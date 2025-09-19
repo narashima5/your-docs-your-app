@@ -2,78 +2,9 @@ import { EcoCard, EcoCardContent, EcoCardDescription, EcoCardHeader, EcoCardTitl
 import { EcoButton } from "@/components/ui/eco-button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { Clock, BookOpen, ArrowLeft, Play, RotateCcw, CheckCircle } from "lucide-react"
+import { Clock, BookOpen, ArrowLeft, Play, RotateCcw, CheckCircle, Loader } from "lucide-react"
 import { Link } from "react-router-dom"
-
-// Mock lessons data
-const mockLessons = [
-  {
-    id: 1,
-    title: "Climate Change Fundamentals",
-    description: "Understanding the science behind global warming and its impacts on our planet.",
-    difficulty: "Beginner",
-    duration: 45,
-    progress: 0,
-    category: "Climate Change",
-    thumbnail: "/api/placeholder/300/200",
-    status: "not_started"
-  },
-  {
-    id: 2,
-    title: "Water Conservation Strategies",
-    description: "Learn practical methods to conserve water in daily life and communities.",
-    difficulty: "Beginner",
-    duration: 30,
-    progress: 65,
-    category: "Water Conservation",
-    thumbnail: "/api/placeholder/300/200",
-    status: "in_progress"
-  },
-  {
-    id: 3,
-    title: "Renewable Energy Sources",
-    description: "Explore solar, wind, and other renewable energy technologies.",
-    difficulty: "Intermediate",
-    duration: 60,
-    progress: 100,
-    category: "Energy",
-    thumbnail: "/api/placeholder/300/200",
-    status: "completed"
-  },
-  {
-    id: 4,
-    title: "Sustainable Agriculture",
-    description: "Modern farming techniques that protect the environment.",
-    difficulty: "Advanced",
-    duration: 75,
-    progress: 0,
-    category: "Agriculture",
-    thumbnail: "/api/placeholder/300/200",
-    status: "not_started"
-  },
-  {
-    id: 5,
-    title: "Plastic Pollution Solutions",
-    description: "Understanding plastic waste and innovative solutions to reduce it.",
-    difficulty: "Intermediate",
-    duration: 40,
-    progress: 25,
-    category: "Waste Management",
-    thumbnail: "/api/placeholder/300/200",
-    status: "in_progress"
-  },
-  {
-    id: 6,
-    title: "Biodiversity Conservation",
-    description: "Protecting ecosystems and endangered species around the world.",
-    difficulty: "Intermediate",
-    duration: 50,
-    progress: 100,
-    category: "Conservation",
-    thumbnail: "/api/placeholder/300/200",
-    status: "completed"
-  }
-]
+import { useLessons } from "@/hooks/useLessons"
 
 const getDifficultyColor = (difficulty: string) => {
   switch (difficulty) {
@@ -84,35 +15,67 @@ const getDifficultyColor = (difficulty: string) => {
   }
 }
 
-const getActionButton = (lesson: any) => {
-  switch (lesson.status) {
-    case "not_started":
-      return (
-        <EcoButton variant="eco" className="w-full">
-          <Play className="h-4 w-4 mr-2" />
-          Start Lesson
-        </EcoButton>
-      )
-    case "in_progress":
-      return (
-        <EcoButton variant="nature" className="w-full">
-          <BookOpen className="h-4 w-4 mr-2" />
-          Resume
-        </EcoButton>
-      )
-    case "completed":
-      return (
-        <EcoButton variant="outline" className="w-full">
-          <RotateCcw className="h-4 w-4 mr-2" />
-          Review
-        </EcoButton>
-      )
-    default:
-      return null
-  }
-}
-
 export default function Lessons() {
+  const { lessons, isLoading, updateProgress, isUpdatingProgress } = useLessons()
+
+  const getActionButton = (lesson: any) => {
+    const handleAction = () => {
+      if (lesson.status === "not_started") {
+        // Start lesson - set 10% progress
+        updateProgress({ lessonId: lesson.id, progressPercentage: 10 })
+      } else if (lesson.status === "in_progress") {
+        // Complete lesson - set 100% progress
+        updateProgress({ lessonId: lesson.id, progressPercentage: 100, isCompleted: true })
+      }
+    }
+
+    switch (lesson.status) {
+      case "not_started":
+        return (
+          <EcoButton 
+            variant="eco" 
+            className="w-full" 
+            onClick={handleAction}
+            disabled={isUpdatingProgress}
+          >
+            {isUpdatingProgress ? <Loader className="h-4 w-4 mr-2 animate-spin" /> : <Play className="h-4 w-4 mr-2" />}
+            Start Lesson
+          </EcoButton>
+        )
+      case "in_progress":
+        return (
+          <EcoButton 
+            variant="nature" 
+            className="w-full"
+            onClick={handleAction}
+            disabled={isUpdatingProgress}
+          >
+            {isUpdatingProgress ? <Loader className="h-4 w-4 mr-2 animate-spin" /> : <BookOpen className="h-4 w-4 mr-2" />}
+            Complete Lesson
+          </EcoButton>
+        )
+      case "completed":
+        return (
+          <EcoButton variant="outline" className="w-full">
+            <CheckCircle className="h-4 w-4 mr-2" />
+            Completed
+          </EcoButton>
+        )
+      default:
+        return null
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-primary/2 to-accent/5 flex items-center justify-center">
+        <div className="text-center">
+          <Loader className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading lessons...</p>
+        </div>
+      </div>
+    )
+  }
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-primary/2 to-accent/5">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
@@ -134,7 +97,7 @@ export default function Lessons() {
 
         {/* Lessons Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {mockLessons.map((lesson) => (
+          {lessons?.map((lesson) => (
             <EcoCard key={lesson.id} variant="interactive" className="group">
               <div className="aspect-video bg-gradient-to-br from-primary/10 to-accent/10 rounded-t-lg relative overflow-hidden">
                 <div className="absolute inset-0 flex items-center justify-center">
@@ -169,16 +132,16 @@ export default function Lessons() {
               <EcoCardContent className="space-y-4">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Clock className="h-4 w-4" />
-                  <span>{lesson.duration} minutes</span>
+                  <span>{lesson.duration_minutes} minutes</span>
                 </div>
 
-                {lesson.progress > 0 && (
+                {lesson.progress && lesson.progress.progress_percentage > 0 && (
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">Progress</span>
-                      <span className="font-medium">{lesson.progress}%</span>
+                      <span className="font-medium">{lesson.progress.progress_percentage}%</span>
                     </div>
-                    <Progress value={lesson.progress} className="h-2" />
+                    <Progress value={lesson.progress.progress_percentage} className="h-2" />
                   </div>
                 )}
 

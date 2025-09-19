@@ -5,85 +5,10 @@ import { StatsCard } from "@/components/ui/stats-card"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ArrowLeft, Search, Filter, Target, Coins, Award, CheckCircle, Clock, Camera } from "lucide-react"
+import { ArrowLeft, Search, Filter, Target, Coins, Award, CheckCircle, Clock, Camera, Loader } from "lucide-react"
 import { Link } from "react-router-dom"
-
-// Mock missions data
-const mockMissions = [
-  {
-    id: 1,
-    title: "Plant a Tree",
-    description: "Plant a native tree species in your locality and document its growth.",
-    instructions: "1. Choose appropriate location\n2. Dig proper sized hole\n3. Plant and water\n4. Take before/after photos",
-    points: 150,
-    difficulty: "Beginner",
-    category: "Conservation",
-    estimatedTime: "2 hours",
-    status: "available"
-  },
-  {
-    id: 2,
-    title: "Plastic-Free Day Challenge",
-    description: "Go an entire day without using any single-use plastic items.",
-    instructions: "1. Plan plastic alternatives\n2. Document your day\n3. Share your experience\n4. Calculate plastic saved",
-    points: 100,
-    difficulty: "Intermediate",
-    category: "Waste Reduction",
-    estimatedTime: "1 day",
-    status: "available"
-  },
-  {
-    id: 3,
-    title: "Community Clean-up Drive",
-    description: "Organize or participate in a local community cleaning activity.",
-    instructions: "1. Gather volunteers\n2. Collect cleaning supplies\n3. Clean designated area\n4. Properly dispose waste",
-    points: 200,
-    difficulty: "Intermediate",
-    category: "Community Action",
-    estimatedTime: "3 hours",
-    status: "completed"
-  },
-  {
-    id: 4,
-    title: "Energy Audit at Home",
-    description: "Conduct a comprehensive energy audit and implement conservation measures.",
-    instructions: "1. Check all appliances\n2. Measure energy consumption\n3. Identify inefficiencies\n4. Implement solutions",
-    points: 120,
-    difficulty: "Advanced",
-    category: "Energy Conservation",
-    estimatedTime: "4 hours",
-    status: "in_progress"
-  },
-  {
-    id: 5,
-    title: "Rain Water Harvesting Setup",
-    description: "Install a basic rainwater collection system for your home or school.",
-    instructions: "1. Design collection system\n2. Install gutters/pipes\n3. Set up storage tank\n4. Test and document",
-    points: 250,
-    difficulty: "Advanced",
-    category: "Water Conservation",
-    estimatedTime: "1 day",
-    status: "available"
-  },
-  {
-    id: 6,
-    title: "Organic Composting Project",
-    description: "Start a composting system using kitchen waste and garden materials.",
-    instructions: "1. Set up compost bin\n2. Collect organic waste\n3. Maintain proper ratios\n4. Monitor decomposition",
-    points: 180,
-    difficulty: "Beginner",
-    category: "Waste Management",
-    estimatedTime: "30 minutes daily",
-    status: "available"
-  }
-]
-
-const mockStats = {
-  totalTasks: 45,
-  completedTasks: 12,
-  ecoPoints: 2450,
-  badgesEarned: 15
-}
+import { useMissions } from "@/hooks/useMissions"
+import { useProfile } from "@/hooks/useProfile"
 
 const getDifficultyColor = (difficulty: string) => {
   switch (difficulty) {
@@ -103,50 +28,104 @@ const getStatusColor = (status: string) => {
   }
 }
 
-const getActionButton = (mission: any) => {
-  switch (mission.status) {
-    case "available":
-      return (
-        <EcoButton variant="eco" className="w-full">
-          <Target className="h-4 w-4 mr-2" />
-          Start Mission
-        </EcoButton>
-      )
-    case "in_progress":
-      return (
-        <EcoButton variant="nature" className="w-full">
-          <Camera className="h-4 w-4 mr-2" />
-          Submit Proof
-        </EcoButton>
-      )
-    case "completed":
-      return (
-        <EcoButton variant="outline" className="w-full" disabled>
-          <CheckCircle className="h-4 w-4 mr-2" />
-          Completed
-        </EcoButton>
-      )
-    default:
-      return null
-  }
-}
-
 export default function Missions() {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [selectedDifficulty, setSelectedDifficulty] = useState("all")
+  
+  const { missions, missionStats, isLoading, startMission, submitMission, isStartingMission, isSubmittingMission } = useMissions()
+  const { profile } = useProfile()
 
-  const categories = ["all", ...Array.from(new Set(mockMissions.map(m => m.category)))]
+  const categories = ["all", ...Array.from(new Set(missions?.map(m => m.category) || []))]
   const difficulties = ["all", "Beginner", "Intermediate", "Advanced"]
 
-  const filteredMissions = mockMissions.filter(mission => {
+  const filteredMissions = missions?.filter(mission => {
     const matchesSearch = mission.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          mission.description.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesCategory = selectedCategory === "all" || mission.category === selectedCategory
     const matchesDifficulty = selectedDifficulty === "all" || mission.difficulty === selectedDifficulty
     
     return matchesSearch && matchesCategory && matchesDifficulty
-  })
+  }) || []
+
+  const getActionButton = (mission: any) => {
+    const handleAction = () => {
+      if (mission.status === "not_started") {
+        startMission(mission.id)
+      } else if (mission.status === "in_progress") {
+        // For demo purposes, auto-submit with sample data
+        submitMission({
+          missionId: mission.id,
+          submissionData: {
+            photos: [],
+            description: "Mission completed successfully!",
+            timestamp: new Date().toISOString()
+          }
+        })
+      }
+    }
+
+    switch (mission.status) {
+      case "not_started":
+        return (
+          <EcoButton 
+            variant="eco" 
+            className="w-full"
+            onClick={handleAction}
+            disabled={isStartingMission}
+          >
+            {isStartingMission ? <Loader className="h-4 w-4 mr-2 animate-spin" /> : <Target className="h-4 w-4 mr-2" />}
+            Start Mission
+          </EcoButton>
+        )
+      case "in_progress":
+        return (
+          <EcoButton 
+            variant="nature" 
+            className="w-full"
+            onClick={handleAction}
+            disabled={isSubmittingMission}
+          >
+            {isSubmittingMission ? <Loader className="h-4 w-4 mr-2 animate-spin" /> : <Camera className="h-4 w-4 mr-2" />}
+            Submit Proof
+          </EcoButton>
+        )
+      case "submitted":
+        return (
+          <EcoButton variant="outline" className="w-full" disabled>
+            <Clock className="h-4 w-4 mr-2" />
+            Under Review
+          </EcoButton>
+        )
+      case "approved":
+        return (
+          <EcoButton variant="outline" className="w-full" disabled>
+            <CheckCircle className="h-4 w-4 mr-2" />
+            Completed
+          </EcoButton>
+        )
+      case "rejected":
+        return (
+          <EcoButton variant="destructive" className="w-full" onClick={handleAction}>
+            <Target className="h-4 w-4 mr-2" />
+            Retry Mission
+          </EcoButton>
+        )
+      default:
+        return null
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-primary/2 to-accent/5 flex items-center justify-center">
+        <div className="text-center">
+          <Loader className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading missions...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-primary/2 to-accent/5">
@@ -171,25 +150,25 @@ export default function Missions() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <StatsCard
             title="Total Tasks"
-            value={mockStats.totalTasks}
+            value={missionStats?.totalTasks || missions?.length || 0}
             icon={Target}
             variant="primary"
           />
           <StatsCard
             title="Completed Tasks"
-            value={mockStats.completedTasks}
+            value={missionStats?.completedTasks || 0}
             icon={CheckCircle}
             variant="success"
           />
           <StatsCard
             title="Eco-Points Earned"
-            value={mockStats.ecoPoints}
+            value={profile?.eco_points || 0}
             icon={Coins}
             variant="accent"
           />
           <StatsCard
             title="Badges Earned"
-            value={mockStats.badgesEarned}
+            value={profile?.badges?.length || 0}
             icon={Award}
             variant="warning"
           />
@@ -279,7 +258,7 @@ export default function Missions() {
                       <Clock className="h-3 w-3" />
                       Duration:
                     </span>
-                    <span className="font-medium">{mission.estimatedTime}</span>
+                    <span className="font-medium">{mission.estimated_time}</span>
                   </div>
                 </div>
 
