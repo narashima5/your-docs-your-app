@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { EcoButton } from "@/components/ui/eco-button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -7,6 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { EcoCard, EcoCardContent, EcoCardDescription, EcoCardHeader, EcoCardTitle } from "@/components/ui/eco-card"
 import { Leaf, Mail, Lock } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { useAuth } from "@/contexts/AuthContext"
 
 export function LoginForm() {
   const [formData, setFormData] = useState({
@@ -16,26 +17,23 @@ export function LoginForm() {
   })
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
+  const { signIn } = useAuth()
+  const navigate = useNavigate()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    const { error } = await signIn(formData.email, formData.password)
 
-    if (formData.email && formData.password) {
-      toast({
-        title: "Welcome back! 🌱",
-        description: "Successfully logged into EcoLearn",
-      })
-      // Redirect to dashboard would happen here
-    } else {
+    if (error) {
       toast({
         title: "Login Failed",
-        description: "Please check your email and password",
+        description: error.message || "Please check your email and password",
         variant: "destructive"
       })
+    } else {
+      navigate('/dashboard')
     }
 
     setIsLoading(false)

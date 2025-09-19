@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { EcoButton } from "@/components/ui/eco-button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -7,6 +7,7 @@ import { EcoCard, EcoCardContent, EcoCardDescription, EcoCardHeader, EcoCardTitl
 import { Progress } from "@/components/ui/progress"
 import { Leaf, User, Mail, Lock, School, MapPin, ArrowLeft, ArrowRight } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { useAuth } from "@/contexts/AuthContext"
 
 interface FormData {
   fullName: string
@@ -33,6 +34,8 @@ export function SignupForm() {
   })
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
+  const { signUp } = useAuth()
+  const navigate = useNavigate()
 
   const totalSteps = 2
   const progress = (currentStep / totalSteps) * 100
@@ -85,16 +88,19 @@ export function SignupForm() {
 
     setIsLoading(true)
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500))
+    const { error } = await signUp(formData.email, formData.password, formData.fullName)
     
-    toast({
-      title: "Account Created! 🌱",
-      description: "Welcome to EcoLearn! Your environmental learning journey begins now.",
-    })
+    if (error) {
+      toast({
+        title: "Signup Failed",
+        description: error.message || "Please try again",
+        variant: "destructive"
+      })
+    } else {
+      navigate('/login')
+    }
     
     setIsLoading(false)
-    // Redirect to dashboard would happen here
   }
 
   const handleChange = (field: keyof FormData, value: string) => {
