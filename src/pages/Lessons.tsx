@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { EcoCard, EcoCardContent, EcoCardDescription, EcoCardHeader, EcoCardTitle } from "@/components/ui/eco-card"
 import { EcoButton } from "@/components/ui/eco-button"
 import { Badge } from "@/components/ui/badge"
@@ -5,6 +6,8 @@ import { Progress } from "@/components/ui/progress"
 import { Clock, BookOpen, ArrowLeft, Play, RotateCcw, CheckCircle, Loader } from "lucide-react"
 import { Link } from "react-router-dom"
 import { useLessons } from "@/hooks/useLessons"
+import { VideoPlayer } from "@/components/lessons/VideoPlayer"
+import { QuizTask } from "@/components/lessons/QuizTask"
 
 const getDifficultyColor = (difficulty: string) => {
   switch (difficulty) {
@@ -17,15 +20,21 @@ const getDifficultyColor = (difficulty: string) => {
 
 export default function Lessons() {
   const { lessons, isLoading, updateProgress, isUpdatingProgress } = useLessons()
+  const [selectedLesson, setSelectedLesson] = useState<any>(null)
+  const [showVideo, setShowVideo] = useState(false)
+  const [showQuiz, setShowQuiz] = useState(false)
 
   const getActionButton = (lesson: any) => {
     const handleAction = () => {
       if (lesson.status === "not_started") {
-        // Start lesson - set 10% progress
+        // Start lesson - open video player
+        setSelectedLesson(lesson)
+        setShowVideo(true)
         updateProgress({ lessonId: lesson.id, progressPercentage: 10 })
       } else if (lesson.status === "in_progress") {
-        // Complete lesson - set 100% progress
-        updateProgress({ lessonId: lesson.id, progressPercentage: 100, isCompleted: true })
+        // Continue lesson - open video player
+        setSelectedLesson(lesson)
+        setShowVideo(true)
       }
     }
 
@@ -51,7 +60,7 @@ export default function Lessons() {
             disabled={isUpdatingProgress}
           >
             {isUpdatingProgress ? <Loader className="h-4 w-4 mr-2 animate-spin" /> : <BookOpen className="h-4 w-4 mr-2" />}
-            Complete Lesson
+            Continue Lesson
           </EcoButton>
         )
       case "completed":
@@ -151,6 +160,47 @@ export default function Lessons() {
           ))}
         </div>
       </div>
+
+      {/* Video Player */}
+      {showVideo && selectedLesson && (
+        <VideoPlayer
+          lesson={selectedLesson}
+          onProgressUpdate={(progress) => {
+            updateProgress({ 
+              lessonId: selectedLesson.id, 
+              progressPercentage: progress 
+            })
+          }}
+          onComplete={() => {
+            setShowVideo(false)
+            setShowQuiz(true)
+          }}
+          onClose={() => {
+            setShowVideo(false)
+            setSelectedLesson(null)
+          }}
+        />
+      )}
+
+      {/* Quiz/Task */}
+      {showQuiz && selectedLesson && (
+        <QuizTask
+          lesson={selectedLesson}
+          onComplete={() => {
+            updateProgress({ 
+              lessonId: selectedLesson.id, 
+              progressPercentage: 100, 
+              isCompleted: true 
+            })
+            setShowQuiz(false)
+            setSelectedLesson(null)
+          }}
+          onClose={() => {
+            setShowQuiz(false)
+            setSelectedLesson(null)
+          }}
+        />
+      )}
     </div>
   )
 }

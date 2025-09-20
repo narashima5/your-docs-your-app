@@ -14,6 +14,50 @@ export type Database = {
   }
   public: {
     Tables: {
+      badges: {
+        Row: {
+          category: string
+          created_at: string
+          description: string
+          id: string
+          image_url: string
+          lesson_id: string | null
+          name: string
+          requirements: Json | null
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description: string
+          id?: string
+          image_url: string
+          lesson_id?: string | null
+          name: string
+          requirements?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string
+          id?: string
+          image_url?: string
+          lesson_id?: string | null
+          name?: string
+          requirements?: Json | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "badges_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lesson_progress: {
         Row: {
           completed_at: string | null
@@ -113,6 +157,7 @@ export type Database = {
           reviewer_notes: string | null
           status: string
           submission_data: Json | null
+          submission_files: string[] | null
           submitted_at: string | null
           updated_at: string
           user_id: string
@@ -126,6 +171,7 @@ export type Database = {
           reviewer_notes?: string | null
           status?: string
           submission_data?: Json | null
+          submission_files?: string[] | null
           submitted_at?: string | null
           updated_at?: string
           user_id: string
@@ -139,6 +185,7 @@ export type Database = {
           reviewer_notes?: string | null
           status?: string
           submission_data?: Json | null
+          submission_files?: string[] | null
           submitted_at?: string | null
           updated_at?: string
           user_id?: string
@@ -210,6 +257,9 @@ export type Database = {
           id: string
           last_activity_date: string | null
           level: number
+          region_country: string | null
+          region_district: string | null
+          region_state: string | null
           streak_days: number
           updated_at: string
           user_id: string
@@ -225,6 +275,9 @@ export type Database = {
           id?: string
           last_activity_date?: string | null
           level?: number
+          region_country?: string | null
+          region_district?: string | null
+          region_state?: string | null
           streak_days?: number
           updated_at?: string
           user_id: string
@@ -240,11 +293,46 @@ export type Database = {
           id?: string
           last_activity_date?: string | null
           level?: number
+          region_country?: string | null
+          region_district?: string | null
+          region_state?: string | null
           streak_days?: number
           updated_at?: string
           user_id?: string
         }
         Relationships: []
+      }
+      user_badges: {
+        Row: {
+          badge_id: string
+          created_at: string
+          earned_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          badge_id: string
+          created_at?: string
+          earned_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          badge_id?: string
+          created_at?: string
+          earned_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_badges_badge_id_fkey"
+            columns: ["badge_id"]
+            isOneToOne: false
+            referencedRelation: "badges"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

@@ -5,10 +5,13 @@ import { StatsCard } from "@/components/ui/stats-card"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ArrowLeft, Search, Filter, Target, Coins, Award, CheckCircle, Clock, Camera, Loader } from "lucide-react"
+import { Textarea } from "@/components/ui/textarea"
+import { ArrowLeft, Search, Filter, Target, Coins, Award, CheckCircle, Clock, Camera, Loader, Trophy } from "lucide-react"
 import { Link } from "react-router-dom"
 import { useMissions } from "@/hooks/useMissions"
 import { useProfile } from "@/hooks/useProfile"
+import { FileUpload } from "@/components/missions/FileUpload"
+import { Leaderboard } from "@/components/missions/Leaderboard"
 
 const getDifficultyColor = (difficulty: string) => {
   switch (difficulty) {
@@ -32,6 +35,10 @@ export default function Missions() {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [selectedDifficulty, setSelectedDifficulty] = useState("all")
+  const [showSubmissionForm, setShowSubmissionForm] = useState<string | null>(null)
+  const [submissionFiles, setSubmissionFiles] = useState<File[]>([])
+  const [submissionDescription, setSubmissionDescription] = useState("")
+  const [showLeaderboard, setShowLeaderboard] = useState(false)
   
   const { missions, missionStats, isLoading, startMission, submitMission, isStartingMission, isSubmittingMission } = useMissions()
   const { profile } = useProfile()
@@ -48,20 +55,34 @@ export default function Missions() {
     return matchesSearch && matchesCategory && matchesDifficulty
   }) || []
 
+  const handleSubmissionSubmit = (missionId: string) => {
+    if (submissionFiles.length === 0) {
+      return
+    }
+
+    // In real app, files would be uploaded to storage first
+    const fileUrls = submissionFiles.map(file => URL.createObjectURL(file))
+    
+    submitMission({
+      missionId,
+      submissionData: {
+        files: fileUrls,
+        description: submissionDescription,
+        timestamp: new Date().toISOString()
+      }
+    })
+
+    setShowSubmissionForm(null)
+    setSubmissionFiles([])
+    setSubmissionDescription("")
+  }
+
   const getActionButton = (mission: any) => {
     const handleAction = () => {
       if (mission.status === "not_started") {
         startMission(mission.id)
       } else if (mission.status === "in_progress") {
-        // For demo purposes, auto-submit with sample data
-        submitMission({
-          missionId: mission.id,
-          submissionData: {
-            photos: [],
-            description: "Mission completed successfully!",
-            timestamp: new Date().toISOString()
-          }
-        })
+        setShowSubmissionForm(mission.id)
       }
     }
 
@@ -144,6 +165,14 @@ export default function Missions() {
               <p className="text-muted-foreground mt-1">Take action and make a real-world impact</p>
             </div>
           </div>
+          
+          <EcoButton
+            variant="eco"
+            onClick={() => setShowLeaderboard(true)}
+          >
+            <Trophy className="h-4 w-4 mr-2" />
+            Leaderboard
+          </EcoButton>
         </div>
 
         {/* Mission Stats */}
@@ -285,6 +314,72 @@ export default function Missions() {
             <Target className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-foreground mb-2">No missions found</h3>
             <p className="text-muted-foreground">Try adjusting your search or filter criteria</p>
+          </div>
+        )}
+
+        {/* Submission Form Modal */}
+        {showSubmissionForm && (
+          <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <EcoCard className="w-full max-w-2xl">
+              <EcoCardHeader>
+                <EcoCardTitle>Submit Mission Proof</EcoCardTitle>
+                <EcoCardDescription>
+                  Upload photos/videos and describe how you completed this mission
+                </EcoCardDescription>
+              </EcoCardHeader>
+              <EcoCardContent className="space-y-6">
+                <FileUpload
+                  onFilesChange={setSubmissionFiles}
+                  acceptedTypes={["image/*", "video/*"]}
+                  maxFiles={5}
+                  maxSizePerFile={50}
+                />
+                
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Description</label>
+                  <Textarea
+                    placeholder="Describe how you completed this mission..."
+                    value={submissionDescription}
+                    onChange={(e) => setSubmissionDescription(e.target.value)}
+                    rows={4}
+                  />
+                </div>
+                
+                <div className="flex gap-3">
+                  <EcoButton
+                    variant="eco"
+                    onClick={() => handleSubmissionSubmit(showSubmissionForm)}
+                    disabled={submissionFiles.length === 0 || !submissionDescription.trim()}
+                  >
+                    Submit Mission
+                  </EcoButton>
+                  <EcoButton
+                    variant="outline"
+                    onClick={() => {
+                      setShowSubmissionForm(null)
+                      setSubmissionFiles([])
+                      setSubmissionDescription("")
+                    }}
+                  >
+                    Cancel
+                  </EcoButton>
+                </div>
+              </EcoCardContent>
+            </EcoCard>
+          </div>
+        )}
+
+        {/* Leaderboard Modal */}
+        {showLeaderboard && (
+          <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="w-full max-w-3xl">
+              <Leaderboard />
+              <div className="mt-4 text-center">
+                <EcoButton variant="outline" onClick={() => setShowLeaderboard(false)}>
+                  Close
+                </EcoButton>
+              </div>
+            </div>
           </div>
         )}
       </div>
