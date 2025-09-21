@@ -61,6 +61,7 @@ export function Leaderboard() {
 
       const { data, error } = await query
         .order('eco_points', { ascending: false })
+        .order('updated_at', { ascending: true }) // First to complete with same points ranks higher
         .limit(50)
 
       if (error) throw error

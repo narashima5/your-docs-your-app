@@ -1,10 +1,10 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { EcoCard, EcoCardContent, EcoCardDescription, EcoCardHeader, EcoCardTitle } from "@/components/ui/eco-card"
 import { EcoButton } from "@/components/ui/eco-button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Clock, BookOpen, ArrowLeft, Play, RotateCcw, CheckCircle, Loader } from "lucide-react"
-import { Link } from "react-router-dom"
+import { Link, useSearchParams } from "react-router-dom"
 import { useLessons } from "@/hooks/useLessons"
 import { VideoPlayer } from "@/components/lessons/VideoPlayer"
 import { QuizTask } from "@/components/lessons/QuizTask"
@@ -19,10 +19,30 @@ const getDifficultyColor = (difficulty: string) => {
 }
 
 export default function Lessons() {
+  const [searchParams] = useSearchParams()
   const { lessons, isLoading, updateProgress, isUpdatingProgress } = useLessons()
   const [selectedLesson, setSelectedLesson] = useState<any>(null)
   const [showVideo, setShowVideo] = useState(false)
   const [showQuiz, setShowQuiz] = useState(false)
+  const [isReplay, setIsReplay] = useState(false)
+
+  // Check for lesson and replay parameters
+  useEffect(() => {
+    const lessonId = searchParams.get('lesson')
+    const replay = searchParams.get('replay')
+    
+    if (lessonId && lessons) {
+      const lesson = lessons.find(l => l.id === lessonId)
+      if (lesson) {
+        setSelectedLesson(lesson)
+        setIsReplay(replay === 'true')
+        if (replay === 'true') {
+          // Show lesson page with retake option instead of automatically starting video
+          return
+        }
+      }
+    }
+  }, [searchParams, lessons])
 
   const getActionButton = (lesson: any) => {
     const handleAction = () => {
@@ -65,9 +85,16 @@ export default function Lessons() {
         )
       case "completed":
         return (
-          <EcoButton variant="outline" className="w-full">
-            <CheckCircle className="h-4 w-4 mr-2" />
-            Completed
+          <EcoButton 
+            variant="outline" 
+            className="w-full"
+            onClick={() => {
+              setSelectedLesson(lesson)
+              setIsReplay(true)
+            }}
+          >
+            <RotateCcw className="h-4 w-4 mr-2" />
+            Replay
           </EcoButton>
         )
       default:
@@ -159,6 +186,106 @@ export default function Lessons() {
             </EcoCard>
           ))}
         </div>
+
+        {/* Replay Lesson Page */}
+        {isReplay && selectedLesson && !showVideo && !showQuiz && (
+          <div className="fixed inset-0 bg-background/95 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <EcoCard className="w-full max-w-4xl max-h-[90vh] overflow-hidden">
+              <EcoCardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <EcoCardTitle className="text-2xl mb-2">{selectedLesson.title}</EcoCardTitle>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Badge className={getDifficultyColor(selectedLesson.difficulty)}>
+                        {selectedLesson.difficulty}
+                      </Badge>
+                      <Badge variant="outline">{selectedLesson.category}</Badge>
+                    </div>
+                  </div>
+                  <EcoButton 
+                    variant="outline" 
+                    onClick={() => {
+                      setIsReplay(false)
+                      setSelectedLesson(null)
+                      window.history.replaceState({}, '', '/lessons')
+                    }}
+                  >
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Back to Lessons
+                  </EcoButton>
+                </div>
+              </EcoCardHeader>
+
+              <EcoCardContent className="space-y-6">
+                <p className="text-muted-foreground">{selectedLesson.description}</p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <EcoCard>
+                    <EcoCardContent className="p-4">
+                      <h3 className="font-semibold mb-3">Lesson Content</h3>
+                      <div className="space-y-3">
+                        <EcoButton 
+                          className="w-full"
+                          onClick={() => {
+                            setShowVideo(true)
+                            setIsReplay(false)
+                          }}
+                        >
+                          <Play className="h-4 w-4 mr-2" />
+                          Retake Lesson
+                        </EcoButton>
+                        <div className="text-sm text-muted-foreground">
+                          Duration: {selectedLesson.duration_minutes} minutes
+                        </div>
+                      </div>
+                    </EcoCardContent>
+                  </EcoCard>
+
+                  <EcoCard>
+                    <EcoCardContent className="p-4">
+                      <h3 className="font-semibold mb-3">Quiz & Tasks</h3>
+                      <div className="space-y-3">
+                        <EcoButton 
+                          variant="outline"
+                          className="w-full" 
+                          disabled
+                        >
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                          Quiz Completed (25 pts)
+                        </EcoButton>
+                        <div className="text-sm text-muted-foreground">
+                          Quiz already completed with full points
+                        </div>
+                      </div>
+                    </EcoCardContent>
+                  </EcoCard>
+                </div>
+
+                <EcoCard>
+                  <EcoCardContent className="p-4">
+                    <h3 className="font-semibold mb-3">Associated Tasks</h3>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-600" />
+                          <span className="text-sm font-medium">Understanding Climate Change</span>
+                        </div>
+                        <Badge className="bg-green-100 text-green-700">Completed</Badge>
+                      </div>
+                      <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-600" />
+                          <span className="text-sm font-medium">Environmental Impact Assessment</span>
+                        </div>
+                        <Badge className="bg-green-100 text-green-700">Completed</Badge>
+                      </div>
+                    </div>
+                  </EcoCardContent>
+                </EcoCard>
+              </EcoCardContent>
+            </EcoCard>
+          </div>
+        )}
       </div>
 
       {/* Video Player */}

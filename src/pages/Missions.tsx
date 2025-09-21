@@ -12,6 +12,8 @@ import { useMissions } from "@/hooks/useMissions"
 import { useProfile } from "@/hooks/useProfile"
 import { FileUpload } from "@/components/missions/FileUpload"
 import { Leaderboard } from "@/components/missions/Leaderboard"
+import { MissionDetailsModal } from "@/components/missions/MissionDetailsModal"
+import { BadgesList } from "@/components/dashboard/BadgesList"
 
 const getDifficultyColor = (difficulty: string) => {
   switch (difficulty) {
@@ -39,6 +41,8 @@ export default function Missions() {
   const [submissionFiles, setSubmissionFiles] = useState<File[]>([])
   const [submissionDescription, setSubmissionDescription] = useState("")
   const [showLeaderboard, setShowLeaderboard] = useState(false)
+  const [selectedMission, setSelectedMission] = useState<any>(null)
+  const [showBadges, setShowBadges] = useState(false)
   
   const { missions, missionStats, isLoading, startMission, submitMission, isStartingMission, isSubmittingMission } = useMissions()
   const { profile } = useProfile()
@@ -195,12 +199,14 @@ export default function Missions() {
             icon={Coins}
             variant="accent"
           />
-          <StatsCard
-            title="Badges Earned"
-            value={profile?.badges?.length || 0}
-            icon={Award}
-            variant="warning"
-          />
+          <div onClick={() => setShowBadges(true)} className="cursor-pointer">
+            <StatsCard
+              title="Badges Earned"
+              value={profile?.badges?.length || 0}
+              icon={Award}
+              variant="warning"
+            />
+          </div>
         </div>
 
         {/* Filters */}
@@ -267,7 +273,10 @@ export default function Missions() {
                   </div>
                 </div>
                 
-                <EcoCardTitle className="text-lg line-clamp-2 mb-2">
+                <EcoCardTitle 
+                  className="text-lg line-clamp-2 mb-2 cursor-pointer hover:text-primary transition-colors"
+                  onClick={() => setSelectedMission(mission)}
+                >
                   {mission.title}
                 </EcoCardTitle>
                 
@@ -382,6 +391,21 @@ export default function Missions() {
             </div>
           </div>
         )}
+
+        {/* Mission Details Modal */}
+        {selectedMission && (
+          <MissionDetailsModal
+            mission={selectedMission}
+            onClose={() => setSelectedMission(null)}
+            onStart={(missionId) => {
+              startMission(missionId)
+              setSelectedMission(null)
+            }}
+          />
+        )}
+
+        {/* Badges Modal */}
+        {showBadges && <BadgesList onClose={() => setShowBadges(false)} />}
       </div>
     </div>
   )

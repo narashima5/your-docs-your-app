@@ -14,6 +14,9 @@ interface Profile {
   badges: string[]
   streak_days: number
   last_activity_date: string | null
+  region_district: string | null
+  region_state: string | null
+  region_country: string | null
   created_at: string
   updated_at: string
 }

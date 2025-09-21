@@ -89,7 +89,7 @@ export function CompletedLessonsList({ onClose }: CompletedLessonsListProps) {
           </div>
         </EcoCardHeader>
 
-        <EcoCardContent className="overflow-y-auto">
+        <EcoCardContent className="overflow-y-auto max-h-[60vh]">
           {isLoading ? (
             <div className="space-y-4">
               {[...Array(5)].map((_, i) => (
@@ -121,6 +121,12 @@ export function CompletedLessonsList({ onClose }: CompletedLessonsListProps) {
                         <Badge className={getDifficultyColor(completedLesson.lesson.difficulty)}>
                           {completedLesson.lesson.difficulty}
                         </Badge>
+                        <EcoButton 
+                          size="sm" 
+                          onClick={() => window.location.href = `/lessons?lesson=${completedLesson.lesson.id}&replay=true`}
+                        >
+                          Replay
+                        </EcoButton>
                       </div>
                     </div>
 

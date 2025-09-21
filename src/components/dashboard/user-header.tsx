@@ -55,7 +55,7 @@ export function UserHeader() {
       </div>
 
       <div className="flex items-center gap-2">
-        <EcoButton variant="outline" size="sm">
+        <EcoButton variant="outline" size="sm" onClick={() => window.location.href = '/profile'}>
           <Settings className="h-4 w-4 mr-2" />
           Settings
         </EcoButton>
