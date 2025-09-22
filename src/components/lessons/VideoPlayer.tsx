@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react"
 import { EcoButton } from "@/components/ui/eco-button"
 import { Progress } from "@/components/ui/progress"
-import { Play, Pause, Volume2, VolumeX, Maximize, X } from "lucide-react"
+import { Play, Pause, Volume2, VolumeX, Maximize, X, SkipForward, SkipBack } from "lucide-react"
 
 interface VideoPlayerProps {
   lesson: {
@@ -74,6 +74,20 @@ export function VideoPlayer({ lesson, onProgressUpdate, onComplete, onClose }: V
     setIsMuted(!isMuted)
   }
 
+  const skipBackward = () => {
+    const video = videoRef.current
+    if (!video) return
+    
+    video.currentTime = Math.max(0, video.currentTime - 10)
+  }
+
+  const skipForward = () => {
+    const video = videoRef.current
+    if (!video) return
+    
+    video.currentTime = Math.min(video.duration, video.currentTime + 10)
+  }
+
   const formatTime = (time: number) => {
     const minutes = Math.floor(time / 60)
     const seconds = Math.floor(time % 60)
@@ -113,10 +127,30 @@ export function VideoPlayer({ lesson, onProgressUpdate, onComplete, onClose }: V
                   <EcoButton
                     variant="ghost"
                     size="sm"
+                    onClick={skipBackward}
+                    className="text-white hover:bg-white/20"
+                    title="Skip backward 10s"
+                  >
+                    <SkipBack className="h-5 w-5" />
+                  </EcoButton>
+                  
+                  <EcoButton
+                    variant="ghost"
+                    size="sm"
                     onClick={togglePlay}
                     className="text-white hover:bg-white/20"
                   >
                     {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+                  </EcoButton>
+                  
+                  <EcoButton
+                    variant="ghost"
+                    size="sm"
+                    onClick={skipForward}
+                    className="text-white hover:bg-white/20"
+                    title="Skip forward 10s"
+                  >
+                    <SkipForward className="h-5 w-5" />
                   </EcoButton>
                   
                   <EcoButton
