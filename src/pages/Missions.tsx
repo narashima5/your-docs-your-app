@@ -82,7 +82,8 @@ export default function Missions() {
   }
 
   const getActionButton = (mission: any) => {
-    const handleAction = () => {
+    const handleAction = (e: React.MouseEvent) => {
+      e.stopPropagation()
       if (mission.status === "not_started") {
         startMission(mission.id)
       } else if (mission.status === "in_progress") {
@@ -256,7 +257,12 @@ export default function Missions() {
         {/* Missions Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredMissions.map((mission) => (
-            <EcoCard key={mission.id} variant="interactive" className="group">
+            <EcoCard 
+              key={mission.id} 
+              variant="interactive" 
+              className="group cursor-pointer" 
+              onClick={() => setSelectedMission(mission)}
+            >
               <EcoCardHeader className="pb-4">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex gap-2">
@@ -273,10 +279,7 @@ export default function Missions() {
                   </div>
                 </div>
                 
-                <EcoCardTitle 
-                  className="text-lg line-clamp-2 mb-2 cursor-pointer hover:text-primary transition-colors"
-                  onClick={() => setSelectedMission(mission)}
-                >
+                <EcoCardTitle className="text-lg line-clamp-2 mb-2 hover:text-primary transition-colors">
                   {mission.title}
                 </EcoCardTitle>
                 
