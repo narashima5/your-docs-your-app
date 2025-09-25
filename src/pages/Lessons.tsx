@@ -8,6 +8,7 @@ import { Link, useSearchParams } from "react-router-dom"
 import { useLessons } from "@/hooks/useLessons"
 import { VideoPlayer } from "@/components/lessons/VideoPlayer"
 import { QuizTask } from "@/components/lessons/QuizTask"
+import { LessonStartModal } from "@/components/lessons/LessonStartModal"
 
 const getDifficultyColor = (difficulty: string) => {
   switch (difficulty) {
@@ -25,6 +26,7 @@ export default function Lessons() {
   const [showVideo, setShowVideo] = useState(false)
   const [showQuiz, setShowQuiz] = useState(false)
   const [isReplay, setIsReplay] = useState(false)
+  const [showLessonModal, setShowLessonModal] = useState(false)
 
   // Check for lesson and replay parameters
   useEffect(() => {
@@ -47,14 +49,13 @@ export default function Lessons() {
   const getActionButton = (lesson: any) => {
     const handleAction = () => {
       if (lesson.status === "not_started") {
-        // Start lesson - open video player
+        // Start lesson - show lesson modal
         setSelectedLesson(lesson)
-        setShowVideo(true)
-        updateProgress({ lessonId: lesson.id, progressPercentage: 10 })
+        setShowLessonModal(true)
       } else if (lesson.status === "in_progress") {
-        // Continue lesson - open video player
+        // Continue lesson - show lesson modal
         setSelectedLesson(lesson)
-        setShowVideo(true)
+        setShowLessonModal(true)
       }
     }
 
@@ -326,6 +327,30 @@ export default function Lessons() {
             setShowQuiz(false)
             setSelectedLesson(null)
           }}
+        />
+      )}
+
+      {/* Lesson Start Modal */}
+      {showLessonModal && selectedLesson && (
+        <LessonStartModal
+          lesson={selectedLesson}
+          isOpen={showLessonModal}
+          onClose={() => {
+            setShowLessonModal(false)
+            setSelectedLesson(null)
+          }}
+          onStartVideo={() => {
+            setShowLessonModal(false)
+            setShowVideo(true)
+            if (selectedLesson.status === "not_started") {
+              updateProgress({ lessonId: selectedLesson.id, progressPercentage: 10 })
+            }
+          }}
+          onStartQuiz={() => {
+            setShowLessonModal(false)
+            setShowQuiz(true)
+          }}
+          lessonProgress={selectedLesson.progress}
         />
       )}
     </div>

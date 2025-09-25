@@ -17,6 +17,9 @@ interface Profile {
   region_district: string | null
   region_state: string | null
   region_country: string | null
+  role: string
+  gender: string | null
+  organization_name: string | null
   created_at: string
   updated_at: string
 }
