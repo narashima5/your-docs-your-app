@@ -45,7 +45,7 @@ export function useVideoProgress(lessonId: string) {
           video_position: position,
           duration: duration,
           last_watched_at: new Date().toISOString()
-        })
+        }, { onConflict: 'user_id,lesson_id' })
         .select()
       
       if (error) throw error
