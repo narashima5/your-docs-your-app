@@ -102,6 +102,39 @@ export type Database = {
           },
         ]
       }
+      lesson_videos: {
+        Row: {
+          created_at: string
+          duration: number | null
+          id: string
+          last_watched_at: string | null
+          lesson_id: string
+          updated_at: string
+          user_id: string
+          video_position: number | null
+        }
+        Insert: {
+          created_at?: string
+          duration?: number | null
+          id?: string
+          last_watched_at?: string | null
+          lesson_id: string
+          updated_at?: string
+          user_id: string
+          video_position?: number | null
+        }
+        Update: {
+          created_at?: string
+          duration?: number | null
+          id?: string
+          last_watched_at?: string | null
+          lesson_id?: string
+          updated_at?: string
+          user_id?: string
+          video_position?: number | null
+        }
+        Relationships: []
+      }
       lessons: {
         Row: {
           category: string
@@ -254,12 +287,15 @@ export type Database = {
           created_at: string
           display_name: string | null
           eco_points: number
+          gender: string | null
           id: string
           last_activity_date: string | null
           level: number
+          organization_name: string | null
           region_country: string | null
           region_district: string | null
           region_state: string | null
+          role: string
           streak_days: number
           updated_at: string
           user_id: string
@@ -272,12 +308,15 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           eco_points?: number
+          gender?: string | null
           id?: string
           last_activity_date?: string | null
           level?: number
+          organization_name?: string | null
           region_country?: string | null
           region_district?: string | null
           region_state?: string | null
+          role?: string
           streak_days?: number
           updated_at?: string
           user_id: string
@@ -290,12 +329,15 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           eco_points?: number
+          gender?: string | null
           id?: string
           last_activity_date?: string | null
           level?: number
+          organization_name?: string | null
           region_country?: string | null
           region_district?: string | null
           region_state?: string | null
+          role?: string
           streak_days?: number
           updated_at?: string
           user_id?: string
@@ -336,7 +378,20 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      organization_leaderboard: {
+        Row: {
+          avg_eco_points: number | null
+          organization_name: string | null
+          region_country: string | null
+          region_district: string | null
+          region_state: string | null
+          student_count: number | null
+          total_eco_points: number | null
+          total_lessons_completed: number | null
+          total_missions_completed: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
