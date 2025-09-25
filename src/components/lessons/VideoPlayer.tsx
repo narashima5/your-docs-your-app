@@ -144,7 +144,25 @@ export function VideoPlayer({ lesson, onProgressUpdate, onComplete, onClose }: V
           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
             <div className="space-y-2">
               {/* Progress Bar */}
-              <Progress value={progress} className="h-1 bg-white/20" />
+              <div 
+                className="h-1 bg-white/20 rounded-full cursor-pointer relative"
+                onClick={(e) => {
+                  const video = videoRef.current
+                  if (!video) return
+                  
+                  const rect = e.currentTarget.getBoundingClientRect()
+                  const clickX = e.clientX - rect.left
+                  const percentage = clickX / rect.width
+                  const newTime = percentage * video.duration
+                  
+                  video.currentTime = newTime
+                }}
+              >
+                <div 
+                  className="h-full bg-white rounded-full transition-all duration-200"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
               
               {/* Controls */}
               <div className="flex items-center justify-between text-white">

@@ -24,7 +24,7 @@ interface Student {
 }
 
 export function OrganizationDashboard() {
-  const { user } = useAuth()
+  const { user, signOut } = useAuth()
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null)
   const [showStudentDetails, setShowStudentDetails] = useState(false)
 
@@ -109,10 +109,15 @@ export function OrganizationDashboard() {
             <h1 className="text-3xl font-bold text-foreground">{organizationProfile.organization_name}</h1>
             <p className="text-muted-foreground mt-1">Organization Dashboard</p>
           </div>
-          <EcoButton variant="outline">
-            <Settings className="h-4 w-4 mr-2" />
-            Settings
-          </EcoButton>
+          <div className="flex items-center gap-2">
+            <EcoButton variant="outline">
+              <Settings className="h-4 w-4 mr-2" />
+              Settings
+            </EcoButton>
+            <EcoButton variant="outline" onClick={() => signOut()}>
+              Logout
+            </EcoButton>
+          </div>
         </div>
 
         {/* Organization Stats */}
