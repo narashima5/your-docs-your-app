@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react"
 import { EcoButton } from "@/components/ui/eco-button"
 import { Progress } from "@/components/ui/progress"
 import { Play, Pause, Volume2, VolumeX, Maximize, X, SkipForward, SkipBack } from "lucide-react"
+import { useVideoProgress } from "@/hooks/useVideoProgress"
 
 interface VideoPlayerProps {
   lesson: {
@@ -21,6 +22,7 @@ export function VideoPlayer({ lesson, onProgressUpdate, onComplete, onClose }: V
   const [isMuted, setIsMuted] = useState(false)
   const [progress, setProgress] = useState(0)
   const videoRef = useRef<HTMLVideoElement>(null)
+  const { progress: videoProgress, updateProgress } = useVideoProgress(lesson.id)
 
   // Sample video URL - in real app, this would come from lesson.content
   const videoUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
@@ -29,11 +31,25 @@ export function VideoPlayer({ lesson, onProgressUpdate, onComplete, onClose }: V
     const video = videoRef.current
     if (!video) return
 
+    // Resume from saved position
+    const handleLoadedMetadata = () => {
+      setDuration(video.duration)
+      if (videoProgress?.video_position) {
+        video.currentTime = videoProgress.video_position
+        setCurrentTime(videoProgress.video_position)
+      }
+    }
+
     const updateTime = () => {
       setCurrentTime(video.currentTime)
       const progressPercent = (video.currentTime / video.duration) * 100
       setProgress(progressPercent)
       onProgressUpdate(progressPercent)
+
+      // Save progress every 5 seconds
+      if (Math.floor(video.currentTime) % 5 === 0) {
+        updateProgress({ position: video.currentTime, duration: video.duration })
+      }
 
       // Complete lesson when 90% watched
       if (progressPercent >= 90) {
@@ -41,18 +57,14 @@ export function VideoPlayer({ lesson, onProgressUpdate, onComplete, onClose }: V
       }
     }
 
-    const updateDuration = () => {
-      setDuration(video.duration)
-    }
-
     video.addEventListener('timeupdate', updateTime)
-    video.addEventListener('loadedmetadata', updateDuration)
+    video.addEventListener('loadedmetadata', handleLoadedMetadata)
 
     return () => {
       video.removeEventListener('timeupdate', updateTime)
-      video.removeEventListener('loadedmetadata', updateDuration)
+      video.removeEventListener('loadedmetadata', handleLoadedMetadata)
     }
-  }, [onProgressUpdate, onComplete])
+  }, [onProgressUpdate, onComplete, videoProgress, updateProgress])
 
   const togglePlay = () => {
     const video = videoRef.current
@@ -115,7 +127,20 @@ export function VideoPlayer({ lesson, onProgressUpdate, onComplete, onClose }: V
             onPause={() => setIsPlaying(false)}
           />
           
-          {/* Video Controls Overlay */}
+          {/* Add controls for video seeking */}
+          <input
+            type="range"
+            min="0"
+            max={duration || 0}
+            value={currentTime}
+            onChange={(e) => {
+              const video = videoRef.current
+              if (video) {
+                video.currentTime = parseFloat(e.target.value)
+              }
+            }}
+            className="absolute inset-x-4 bottom-16 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white"
+          />
           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
             <div className="space-y-2">
               {/* Progress Bar */}

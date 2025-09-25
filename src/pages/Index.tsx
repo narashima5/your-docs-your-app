@@ -6,14 +6,6 @@ import { Leaf, TreePine, Flower2, ArrowRight } from "lucide-react"
 const Index = () => {
   const navigate = useNavigate()
 
-  // Auto-redirect to login after a short delay to show the landing
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      navigate('/login')
-    }, 3000)
-
-    return () => clearTimeout(timer)
-  }, [navigate])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-accent/10 flex items-center justify-center p-4 relative overflow-hidden">
@@ -40,7 +32,7 @@ const Index = () => {
             <Leaf className="h-16 w-16 text-primary leaf-sway" />
           </div>
           <h1 className="text-6xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            EcoLearn
+            GameGreenEco
           </h1>
         </div>
 
@@ -97,14 +89,10 @@ const Index = () => {
             onClick={() => navigate('/signup')}
             className="text-lg px-8"
           >
-            Join EcoLearn
+            Join GameGreenEco
           </EcoButton>
         </div>
 
-        {/* Auto-redirect notice */}
-        <p className="text-sm text-muted-foreground mt-6 slide-up" style={{ animationDelay: "0.8s" }}>
-          Redirecting to login page automatically...
-        </p>
       </div>
     </div>
   );

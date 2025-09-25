@@ -3,9 +3,10 @@ import { Link, useNavigate } from "react-router-dom"
 import { EcoButton } from "@/components/ui/eco-button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { EcoCard, EcoCardContent, EcoCardDescription, EcoCardHeader, EcoCardTitle } from "@/components/ui/eco-card"
 import { Progress } from "@/components/ui/progress"
-import { Leaf, User, Mail, Lock, School, MapPin, ArrowLeft, ArrowRight } from "lucide-react"
+import { Leaf, User, Mail, Lock, School, MapPin, ArrowLeft, ArrowRight, UserCheck, Users } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "@/contexts/AuthContext"
 
@@ -18,6 +19,8 @@ interface FormData {
   district: string
   state: string
   country: string
+  role: string
+  gender: string
 }
 
 export function SignupForm() {
@@ -30,14 +33,16 @@ export function SignupForm() {
     school: "",
     district: "",
     state: "",
-    country: "India"
+    country: "India",
+    role: "student",
+    gender: ""
   })
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
   const { signUp } = useAuth()
   const navigate = useNavigate()
 
-  const totalSteps = 2
+  const totalSteps = 3
   const progress = (currentStep / totalSteps) * 100
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -76,11 +81,25 @@ export function SignupForm() {
       return
     }
 
-    // Final submission
-    if (!formData.school || !formData.district || !formData.state) {
+    if (currentStep === 2) {
+      // Validate step 2 (educational details)
+      if (!formData.school || !formData.district || !formData.state) {
+        toast({
+          title: "Missing Information",
+          description: "Please fill in all educational details",
+          variant: "destructive"
+        })
+        return
+      }
+      setCurrentStep(3)
+      return
+    }
+
+    // Final submission (step 3)
+    if (!formData.role || !formData.gender) {
       toast({
-        title: "Missing Information",
-        description: "Please fill in all educational details",
+        title: "Missing Information", 
+        description: "Please select your role and gender",
         variant: "destructive"
       })
       return
@@ -88,7 +107,15 @@ export function SignupForm() {
 
     setIsLoading(true)
     
-    const { error } = await signUp(formData.email, formData.password, formData.fullName)
+    const { error } = await signUp(formData.email, formData.password, {
+      display_name: formData.fullName,
+      role: formData.role,
+      organization_name: formData.role === 'organization' ? formData.fullName : formData.school,
+      region_district: formData.district,
+      region_state: formData.state,
+      region_country: formData.country,
+      gender: formData.gender
+    })
     
     if (error) {
       toast({
@@ -121,7 +148,7 @@ export function SignupForm() {
             <Leaf className="h-8 w-8 text-primary leaf-sway" />
           </div>
         </div>
-        <EcoCardTitle>Join EcoLearn</EcoCardTitle>
+        <EcoCardTitle>Join GameGreenEco</EcoCardTitle>
         <EcoCardDescription>
           Start your journey toward environmental awareness
         </EcoCardDescription>
@@ -268,6 +295,72 @@ export function SignupForm() {
                   readOnly
                   className="bg-muted"
                 />
+              </div>
+            </div>
+          )}
+
+          {currentStep === 3 && (
+            <div className="space-y-4 slide-up">
+              <div className="text-center mb-4">
+                <h3 className="text-lg font-semibold text-foreground">Role & Personal Details</h3>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="role">I am a *</Label>
+                <Select value={formData.role} onValueChange={(value) => handleChange("role", value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select your role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="student">
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4" />
+                        Student
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="organization">
+                      <div className="flex items-center gap-2">
+                        <Users className="h-4 w-4" />
+                        Organization (School/College)
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="gender">Gender *</Label>
+                <Select value={formData.gender} onValueChange={(value) => handleChange("gender", value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select your gender" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="male">
+                      <div className="flex items-center gap-2">
+                        <UserCheck className="h-4 w-4" />
+                        Male
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="female">
+                      <div className="flex items-center gap-2">
+                        <UserCheck className="h-4 w-4" />
+                        Female
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="other">
+                      <div className="flex items-center gap-2">
+                        <UserCheck className="h-4 w-4" />
+                        Other
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="prefer_not_to_say">
+                      <div className="flex items-center gap-2">
+                        <UserCheck className="h-4 w-4" />
+                        Prefer not to say
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           )}

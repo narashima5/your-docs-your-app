@@ -36,9 +36,11 @@ export function Leaderboard() {
 
       if (!userProfile) return []
 
+      // Fix leaderboard query to show all students properly
       let query = supabase
         .from('profiles')
         .select('user_id, display_name, eco_points, completed_missions, region_district, region_state, region_country')
+        .eq('role', 'student') // Only show students in leaderboard
 
       // Filter by region
       switch (selectedRegion) {

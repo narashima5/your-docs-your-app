@@ -6,7 +6,7 @@ import { useToast } from '@/hooks/use-toast'
 interface AuthContextType {
   user: User | null
   session: Session | null
-  signUp: (email: string, password: string, displayName?: string) => Promise<{ error: any }>
+  signUp: (email: string, password: string, metadata?: any) => Promise<{ error: any }>
   signIn: (email: string, password: string) => Promise<{ error: any }>
   signOut: () => Promise<void>
   loading: boolean
@@ -28,12 +28,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(session?.user ?? null)
         setLoading(false)
 
-        if (event === 'SIGNED_IN') {
-          toast({
-            title: "Welcome back! 🌱",
-            description: "Successfully logged into EcoLearn",
-          })
-        }
       }
     )
 
@@ -47,7 +41,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe()
   }, [toast])
 
-  const signUp = async (email: string, password: string, displayName?: string) => {
+  const signUp = async (email: string, password: string, metadata?: any) => {
     const redirectUrl = `${window.location.origin}/dashboard`
     
     const { error } = await supabase.auth.signUp({
@@ -55,8 +49,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       password,
       options: {
         emailRedirectTo: redirectUrl,
-        data: {
-          display_name: displayName || email.split('@')[0]
+        data: metadata || {
+          display_name: email.split('@')[0]
         }
       }
     })
@@ -81,10 +75,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     await supabase.auth.signOut()
-    toast({
-      title: "Logged out",
-      description: "You've been successfully logged out",
-    })
   }
 
   const value = {
