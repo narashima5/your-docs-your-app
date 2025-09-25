@@ -3,12 +3,13 @@ import { EcoCard, EcoCardContent, EcoCardDescription, EcoCardHeader, EcoCardTitl
 import { EcoButton } from "@/components/ui/eco-button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { Clock, BookOpen, ArrowLeft, Play, RotateCcw, CheckCircle, Loader } from "lucide-react"
+import { Clock, BookOpen, ArrowLeft, Play, RotateCcw, CheckCircle, Loader, Target, Lock } from "lucide-react"
 import { Link, useSearchParams } from "react-router-dom"
 import { useLessons } from "@/hooks/useLessons"
 import { VideoPlayer } from "@/components/lessons/VideoPlayer"
 import { QuizTask } from "@/components/lessons/QuizTask"
 import { LessonStartModal } from "@/components/lessons/LessonStartModal"
+import { useLessonMissions } from "@/hooks/useLessonMissions"
 
 const getDifficultyColor = (difficulty: string) => {
   switch (difficulty) {
@@ -27,6 +28,8 @@ export default function Lessons() {
   const [showQuiz, setShowQuiz] = useState(false)
   const [isReplay, setIsReplay] = useState(false)
   const [showLessonModal, setShowLessonModal] = useState(false)
+  const [showMissions, setShowMissions] = useState(false)
+  const { missions } = useLessonMissions(selectedLesson?.id)
 
   // Check for lesson and replay parameters
   useEffect(() => {
@@ -321,7 +324,12 @@ export default function Lessons() {
               isCompleted: true 
             })
             setShowQuiz(false)
-            setSelectedLesson(null)
+            // Show missions if available
+            if (missions?.length > 0) {
+              setShowMissions(true)
+            } else {
+              setSelectedLesson(null)
+            }
           }}
           onClose={() => {
             setShowQuiz(false)
@@ -352,6 +360,80 @@ export default function Lessons() {
           }}
           lessonProgress={selectedLesson.progress}
         />
+      )}
+
+      {/* Missions Modal */}
+      {showMissions && selectedLesson && missions?.length > 0 && (
+        <div className="fixed inset-0 bg-background/95 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <EcoCard className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <EcoCardHeader>
+              <EcoCardTitle className="text-2xl mb-2">Congratulations! 🎉</EcoCardTitle>
+              <EcoCardDescription>
+                You've completed the lesson "{selectedLesson.title}". Now you can tackle these real-world missions to apply what you've learned!
+              </EcoCardDescription>
+            </EcoCardHeader>
+
+            <EcoCardContent className="space-y-4">
+              <div className="grid gap-4">
+                {missions.map((mission) => (
+                  <EcoCard key={mission.id} className="border border-border/50">
+                    <EcoCardContent className="p-4">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Target className="h-5 w-5 text-primary" />
+                            <h3 className="font-semibold">{mission.title}</h3>
+                            <Badge variant="outline">{mission.points} points</Badge>
+                          </div>
+                          
+                          <p className="text-sm text-muted-foreground mb-3">
+                            {mission.description}
+                          </p>
+                          
+                          <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                            <span>Difficulty: {mission.difficulty}</span>
+                            <span>Category: {mission.category}</span>
+                            <span>Time: {mission.estimated_time}</span>
+                          </div>
+                        </div>
+                        
+                        <div className="flex flex-col gap-2">
+                          <Link to={`/missions?mission=${mission.id}`}>
+                            <EcoButton size="sm">
+                              Start Mission
+                            </EcoButton>
+                          </Link>
+                          {mission.status !== 'not_started' && (
+                            <Badge className={
+                              mission.status === 'approved' ? 'bg-green-100 text-green-700' :
+                              mission.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                              mission.status === 'submitted' ? 'bg-blue-100 text-blue-700' :
+                              'bg-gray-100 text-gray-700'
+                            }>
+                              {mission.status}
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    </EcoCardContent>
+                  </EcoCard>
+                ))}
+              </div>
+              
+              <div className="flex justify-center pt-4">
+                <EcoButton 
+                  variant="outline" 
+                  onClick={() => {
+                    setShowMissions(false)
+                    setSelectedLesson(null)
+                  }}
+                >
+                  Continue Learning
+                </EcoButton>
+              </div>
+            </EcoCardContent>
+          </EcoCard>
+        </div>
       )}
     </div>
   )

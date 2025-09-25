@@ -243,6 +243,7 @@ export type Database = {
           id: string
           instructions: string
           is_active: boolean
+          lesson_id: string | null
           points: number
           requirements: Json | null
           title: string
@@ -257,6 +258,7 @@ export type Database = {
           id?: string
           instructions: string
           is_active?: boolean
+          lesson_id?: string | null
           points?: number
           requirements?: Json | null
           title: string
@@ -271,12 +273,21 @@ export type Database = {
           id?: string
           instructions?: string
           is_active?: boolean
+          lesson_id?: string | null
           points?: number
           requirements?: Json | null
           title?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "missions_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {

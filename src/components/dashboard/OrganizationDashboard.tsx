@@ -9,6 +9,7 @@ import { Users, Settings, TrendingUp, Award, BookOpen, Target } from "lucide-rea
 import { StudentDetailsModal } from "./StudentDetailsModal"
 import { StatsCard } from "@/components/ui/stats-card"
 import { OrganizationLeaderboard } from "@/components/missions/OrganizationLeaderboard"
+import { OrganizationSettings } from "./OrganizationSettings"
 
 interface Student {
   id: string
@@ -27,6 +28,7 @@ export function OrganizationDashboard() {
   const { user, signOut } = useAuth()
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null)
   const [showStudentDetails, setShowStudentDetails] = useState(false)
+  const [showSettings, setShowSettings] = useState(false)
 
   const { data: organizationProfile } = useQuery({
     queryKey: ['organization-profile', user?.id],
@@ -53,7 +55,7 @@ export function OrganizationDashboard() {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('organization_name', organizationProfile.organization_name)
+        .ilike('organization_name', organizationProfile.organization_name)
         .eq('role', 'student')
         .order('eco_points', { ascending: false })
       
@@ -71,7 +73,7 @@ export function OrganizationDashboard() {
       const { data, error } = await supabase
         .from('profiles')
         .select('eco_points, completed_lessons, completed_missions')
-        .eq('organization_name', organizationProfile.organization_name)
+        .ilike('organization_name', organizationProfile.organization_name)
         .eq('role', 'student')
       
       if (error) throw error
@@ -110,7 +112,7 @@ export function OrganizationDashboard() {
             <p className="text-muted-foreground mt-1">Organization Dashboard</p>
           </div>
           <div className="flex items-center gap-2">
-            <EcoButton variant="outline">
+            <EcoButton variant="outline" onClick={() => setShowSettings(true)}>
               <Settings className="h-4 w-4 mr-2" />
               Settings
             </EcoButton>
@@ -223,6 +225,12 @@ export function OrganizationDashboard() {
             }}
           />
         )}
+
+        {/* Settings Modal */}
+        <OrganizationSettings
+          isOpen={showSettings}
+          onClose={() => setShowSettings(false)}
+        />
       </div>
     </div>
   )

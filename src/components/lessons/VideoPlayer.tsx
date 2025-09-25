@@ -35,8 +35,10 @@ export function VideoPlayer({ lesson, onProgressUpdate, onComplete, onClose }: V
     const handleLoadedMetadata = () => {
       setDuration(video.duration)
       if (videoProgress?.video_position) {
-        video.currentTime = videoProgress.video_position
-        setCurrentTime(videoProgress.video_position)
+        video.currentTime = Number(videoProgress.video_position)
+        setCurrentTime(Number(videoProgress.video_position))
+        const progressPercent = (Number(videoProgress.video_position) / video.duration) * 100
+        setProgress(progressPercent)
       }
     }
 
