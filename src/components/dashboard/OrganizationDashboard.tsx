@@ -55,7 +55,7 @@ export function OrganizationDashboard() {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .ilike('organization_name', organizationProfile.organization_name)
+        .eq('organization_name', organizationProfile.organization_name)
         .eq('role', 'student')
         .order('eco_points', { ascending: false })
       
@@ -73,7 +73,7 @@ export function OrganizationDashboard() {
       const { data, error } = await supabase
         .from('profiles')
         .select('eco_points, completed_lessons, completed_missions')
-        .ilike('organization_name', organizationProfile.organization_name)
+        .eq('organization_name', organizationProfile.organization_name)
         .eq('role', 'student')
       
       if (error) throw error

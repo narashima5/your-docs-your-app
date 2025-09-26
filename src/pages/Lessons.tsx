@@ -324,12 +324,8 @@ export default function Lessons() {
               isCompleted: true 
             })
             setShowQuiz(false)
-            // Show missions if available
-            if (missions?.length > 0) {
-              setShowMissions(true)
-            } else {
-              setSelectedLesson(null)
-            }
+            // Always show missions modal after completing quiz
+            setShowMissions(true)
           }}
           onClose={() => {
             setShowQuiz(false)
@@ -363,7 +359,7 @@ export default function Lessons() {
       )}
 
       {/* Missions Modal */}
-      {showMissions && selectedLesson && missions?.length > 0 && (
+      {showMissions && selectedLesson && (
         <div className="fixed inset-0 bg-background/95 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <EcoCard className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
             <EcoCardHeader>
@@ -374,8 +370,9 @@ export default function Lessons() {
             </EcoCardHeader>
 
             <EcoCardContent className="space-y-4">
-              <div className="grid gap-4">
-                {missions.map((mission) => (
+              {missions?.length > 0 ? (
+                <div className="grid gap-4">
+                  {missions.map((mission) => (
                   <EcoCard key={mission.id} className="border border-border/50">
                     <EcoCardContent className="p-4">
                       <div className="flex items-start justify-between gap-4">
@@ -417,8 +414,24 @@ export default function Lessons() {
                       </div>
                     </EcoCardContent>
                   </EcoCard>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Target className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="font-semibold mb-2">No Missions Available</h3>
+                  <p className="text-muted-foreground">
+                    No missions are currently linked to this lesson. Check back later or explore other missions!
+                  </p>
+                  <div className="mt-4">
+                    <Link to="/missions">
+                      <EcoButton>
+                        Browse All Missions
+                      </EcoButton>
+                    </Link>
+                  </div>
+                </div>
+              )}
               
               <div className="flex justify-center pt-4">
                 <EcoButton 

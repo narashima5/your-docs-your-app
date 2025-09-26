@@ -21,25 +21,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { toast } = useToast()
 
   useEffect(() => {
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+    let mounted = true
+
+    // Get initial session first
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (mounted) {
         setSession(session)
         setUser(session?.user ?? null)
         setLoading(false)
+      }
+    })
 
+    // Then set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (mounted) {
+          setSession(session)
+          setUser(session?.user ?? null)
+          setLoading(false)
+        }
       }
     )
 
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      setUser(session?.user ?? null)
-      setLoading(false)
-    })
-
-    return () => subscription.unsubscribe()
-  }, [toast])
+    return () => {
+      mounted = false
+      subscription.unsubscribe()
+    }
+  }, [])
 
   const signUp = async (email: string, password: string, metadata?: any) => {
     const redirectUrl = `${window.location.origin}/dashboard`
