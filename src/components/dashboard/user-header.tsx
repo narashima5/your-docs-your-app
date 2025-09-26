@@ -4,12 +4,10 @@ import { EcoButton } from "@/components/ui/eco-button"
 import { Settings, LogOut, Trophy, Flame } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
 import { useProfile } from "@/hooks/useProfile"
-import { useNavigate } from "react-router-dom"
 
 export function UserHeader() {
   const { user, signOut } = useAuth()
   const { profile, isLoading } = useProfile()
-  const navigate = useNavigate()
 
   if (isLoading || !user || !profile) {
     return (
@@ -57,7 +55,7 @@ export function UserHeader() {
       </div>
 
       <div className="flex items-center gap-2">
-        <EcoButton variant="outline" size="sm" onClick={() => navigate('/profile')}>
+        <EcoButton variant="outline" size="sm" onClick={() => window.location.href = '/profile'}>
           <Settings className="h-4 w-4 mr-2" />
           Settings
         </EcoButton>

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, useRef } from 'react'
+import React, { createContext, useContext, useEffect, useState } from 'react'
 import { User, Session } from '@supabase/supabase-js'
 import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
@@ -19,30 +19,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
   const { toast } = useToast()
-  const initializedRef = useRef(false)
 
   useEffect(() => {
     let mounted = true
 
-    // Set up auth state listener FIRST to avoid missing events
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!mounted) return
-      setSession(session)
-      setUser(session?.user ?? null)
-      // Only turn off loading after initial session check has completed
-      if (initializedRef.current) {
+    // Get initial session first
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (mounted) {
+        setSession(session)
+        setUser(session?.user ?? null)
         setLoading(false)
       }
     })
 
-    // THEN get the initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!mounted) return
-      setSession(session)
-      setUser(session?.user ?? null)
-      setLoading(false)
-      initializedRef.current = true
-    })
+    // Then set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (mounted) {
+          setSession(session)
+          setUser(session?.user ?? null)
+          setLoading(false)
+        }
+      }
+    )
 
     return () => {
       mounted = false
@@ -51,7 +50,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const signUp = async (email: string, password: string, metadata?: any) => {
-    const redirectUrl = `${window.location.origin}/`
+    const redirectUrl = `${window.location.origin}/dashboard`
     
     const { error } = await supabase.auth.signUp({
       email,
