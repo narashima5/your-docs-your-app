@@ -23,16 +23,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let mounted = true
 
-    // Get initial session first
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (mounted) {
-        setSession(session)
-        setUser(session?.user ?? null)
-        setLoading(false)
-      }
-    })
-
-    // Then set up auth state listener
+    // Set up auth state listener FIRST to catch all events
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (mounted) {
@@ -42,6 +33,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       }
     )
+
+    // Then get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (mounted) {
+        setSession(session)
+        setUser(session?.user ?? null)
+        setLoading(false)
+      }
+    })
 
     return () => {
       mounted = false
@@ -58,7 +58,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       options: {
         emailRedirectTo: redirectUrl,
         data: metadata || {
-          display_name: email.split('@')[0]
+          display_name: email.split('@')[0],
+          role: 'student'
         }
       }
     })

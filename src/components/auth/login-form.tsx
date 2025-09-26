@@ -33,7 +33,7 @@ export function LoginForm() {
         variant: "destructive"
       })
     } else {
-      navigate('/dashboard')
+      navigate('/dashboard', { replace: true })
     }
 
     setIsLoading(false)

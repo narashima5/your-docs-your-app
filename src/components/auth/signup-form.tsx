@@ -124,7 +124,7 @@ export function SignupForm() {
         variant: "destructive"
       })
     } else {
-      navigate('/login')
+      navigate('/login', { replace: true })
     }
     
     setIsLoading(false)
