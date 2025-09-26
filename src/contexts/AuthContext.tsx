@@ -27,18 +27,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (mounted) {
-          setSession(session)
-          setUser(session?.user ?? null)
+          // Handle token refresh errors
+          if (event === 'TOKEN_REFRESHED' && !session) {
+            console.log('Token refresh failed, clearing session')
+            setSession(null)
+            setUser(null)
+          } else {
+            setSession(session)
+            setUser(session?.user ?? null)
+          }
           setLoading(false)
         }
       }
     )
 
-    // Then get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    // Then get initial session with error handling
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
       if (mounted) {
-        setSession(session)
-        setUser(session?.user ?? null)
+        if (error) {
+          console.log('Session error:', error.message)
+          // Clear any corrupted session data
+          supabase.auth.signOut()
+          setSession(null)
+          setUser(null)
+        } else {
+          setSession(session)
+          setUser(session?.user ?? null)
+        }
+        setLoading(false)
+      }
+    }).catch((error) => {
+      if (mounted) {
+        console.log('Failed to get session:', error.message)
+        setSession(null)
+        setUser(null)
         setLoading(false)
       }
     })
