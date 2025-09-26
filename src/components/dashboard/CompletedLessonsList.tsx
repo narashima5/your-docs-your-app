@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import { BookOpen, X, Calendar, Clock } from "lucide-react"
 import { supabase } from "@/integrations/supabase/client"
 import { useAuth } from "@/contexts/AuthContext"
+import { useNavigate } from "react-router-dom"
 
 interface CompletedLesson {
   id: string
@@ -26,6 +27,7 @@ interface CompletedLessonsListProps {
 
 export function CompletedLessonsList({ onClose }: CompletedLessonsListProps) {
   const { user } = useAuth()
+  const navigate = useNavigate()
 
   const { data: completedLessons, isLoading } = useQuery({
     queryKey: ['completed-lessons', user?.id],
@@ -123,7 +125,7 @@ export function CompletedLessonsList({ onClose }: CompletedLessonsListProps) {
                         </Badge>
                         <EcoButton 
                           size="sm" 
-                          onClick={() => window.location.href = `/lessons?lesson=${completedLesson.lesson.id}&replay=true`}
+                          onClick={() => navigate(`/lessons?lesson=${completedLesson.lesson.id}&replay=true`)}
                         >
                           Replay
                         </EcoButton>
