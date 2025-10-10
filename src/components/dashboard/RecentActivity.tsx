@@ -35,7 +35,7 @@ export function RecentActivity({ organizationName }: RecentActivityProps) {
       const orgCode = (orgProfile as any)?.organization_code
       if (!orgCode) return []
       // Fetch recent activities for this organization (RLS restricts access)
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('activity_log')
         .select('*')
         .eq('organization_code', orgCode)
