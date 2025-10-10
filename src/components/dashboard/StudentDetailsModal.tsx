@@ -423,9 +423,10 @@ export function StudentDetailsModal({ student, organizationName, onClose }: Stud
                     onClick={() => handleReviewSubmission(selectedSubmission, 'approved')}
                     disabled={reviewSubmissionMutation.isPending || !selectedSubmission.video_url}
                     className="flex-1"
+                    title={!selectedSubmission.video_url ? "Video proof is required for approval" : ""}
                   >
                     <CheckCircle className="h-4 w-4 mr-2" />
-                    Approve (+{selectedSubmission.missions.points} points)
+                    {selectedSubmission.video_url ? `Approve (+${selectedSubmission.missions.points} points)` : 'No Video - Cannot Approve'}
                   </EcoButton>
                   <EcoButton
                     variant="outline"

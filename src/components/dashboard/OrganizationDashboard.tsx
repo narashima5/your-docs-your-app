@@ -3,7 +3,8 @@ import { useAuth } from "@/contexts/AuthContext"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { EcoButton } from "@/components/ui/eco-button"
-import { Users, Settings, TrendingUp, Award, BookOpen, Target } from "lucide-react"
+import { Users, Settings, TrendingUp, Award, BookOpen, Target, Trophy } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
 import { StatsCard } from "@/components/ui/stats-card"
 import { StudentsModal } from "./StudentsModal"
 import { RecentActivity } from "./RecentActivity"
@@ -104,18 +105,35 @@ export function OrganizationDashboard() {
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">{organizationProfile.organization_name}</h1>
-            <p className="text-muted-foreground mt-1">
-              Organization Dashboard • Level {organizationProfile.level} • {organizationProfile.eco_points} Eco Points
-            </p>
+          <div className="flex items-center gap-4">
+            <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center ring-2 ring-primary/20">
+              <Users className="h-8 w-8 text-primary" />
+            </div>
+            
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <h2 className="text-2xl font-bold text-foreground">
+                  {organizationProfile.organization_name}
+                </h2>
+                <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
+                  Level {organizationProfile.level}
+                </Badge>
+              </div>
+              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <div className="flex items-center gap-1">
+                  <Trophy className="h-4 w-4 text-accent" />
+                  <span>{organizationProfile.eco_points.toLocaleString()} Eco Points</span>
+                </div>
+              </div>
+            </div>
           </div>
+
           <div className="flex items-center gap-2">
-            <EcoButton variant="outline" onClick={() => setShowSettings(true)}>
+            <EcoButton variant="outline" size="sm" onClick={() => setShowSettings(true)}>
               <Settings className="h-4 w-4 mr-2" />
               Settings
             </EcoButton>
-            <EcoButton variant="outline" onClick={() => signOut()}>
+            <EcoButton variant="outline" size="sm" onClick={() => signOut()}>
               Logout
             </EcoButton>
           </div>
