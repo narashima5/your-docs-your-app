@@ -10,6 +10,7 @@ import { ArrowLeft, Search, Filter, Target, Coins, Award, CheckCircle, Clock, Ca
 import { Link } from "react-router-dom"
 import { useMissions } from "@/hooks/useMissions"
 import { useProfile } from "@/hooks/useProfile"
+import { useUserBadges } from "@/hooks/useUserBadges"
 import { FileUpload } from "@/components/missions/FileUpload"
 import { Leaderboard } from "@/components/missions/Leaderboard"
 import { MissionDetailsModal } from "@/components/missions/MissionDetailsModal"
@@ -46,6 +47,7 @@ export default function Missions() {
   
   const { missions, missionStats, isLoading, startMission, submitMission, isStartingMission, isSubmittingMission } = useMissions()
   const { profile } = useProfile()
+  const { badgeCount } = useUserBadges()
 
   const categories = ["all", ...Array.from(new Set(missions?.map(m => m.category) || []))]
   const difficulties = ["all", "Beginner", "Intermediate", "Advanced"]
@@ -203,7 +205,7 @@ export default function Missions() {
           <div onClick={() => setShowBadges(true)} className="cursor-pointer">
             <StatsCard
               title="Badges Earned"
-              value={profile?.badges?.length || 0}
+              value={badgeCount}
               icon={Award}
               variant="warning"
             />

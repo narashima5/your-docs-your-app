@@ -2,13 +2,11 @@ import { useState } from "react"
 import { useAuth } from "@/contexts/AuthContext"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
-import { EcoCard, EcoCardContent, EcoCardHeader, EcoCardTitle } from "@/components/ui/eco-card"
 import { EcoButton } from "@/components/ui/eco-button"
-import { Badge } from "@/components/ui/badge"
 import { Users, Settings, TrendingUp, Award, BookOpen, Target } from "lucide-react"
-import { StudentDetailsModal } from "./StudentDetailsModal"
 import { StatsCard } from "@/components/ui/stats-card"
-import { OrganizationLeaderboard } from "@/components/missions/OrganizationLeaderboard"
+import { StudentsModal } from "./StudentsModal"
+import { RecentActivity } from "./RecentActivity"
 import { OrganizationSettings } from "./OrganizationSettings"
 
 interface Student {
@@ -26,8 +24,7 @@ interface Student {
 
 export function OrganizationDashboard() {
   const { user, signOut } = useAuth()
-  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null)
-  const [showStudentDetails, setShowStudentDetails] = useState(false)
+  const [showStudentsModal, setShowStudentsModal] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
 
   const { data: organizationProfile } = useQuery({
@@ -124,12 +121,14 @@ export function OrganizationDashboard() {
 
         {/* Organization Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
-          <StatsCard
-            title="Total Students"
-            value={organizationStats?.totalStudents?.toString() || "0"}
-            description="Registered students"
-            icon={Users}
-          />
+          <div onClick={() => setShowStudentsModal(true)} className="cursor-pointer">
+            <StatsCard
+              title="Total Students"
+              value={organizationStats?.totalStudents?.toString() || "0"}
+              description="Click to view all"
+              icon={Users}
+            />
+          </div>
           <StatsCard
             title="Total Eco Points"
             value={organizationStats?.totalEcoPoints?.toString() || "0"}
@@ -156,75 +155,18 @@ export function OrganizationDashboard() {
           />
         </div>
 
-        {/* Students List */}
-        <EcoCard>
-          <EcoCardHeader>
-            <EcoCardTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              Students ({students.length})
-            </EcoCardTitle>
-          </EcoCardHeader>
-          <EcoCardContent>
-            {isLoading ? (
-              <div className="text-center py-8">
-                <p className="text-muted-foreground">Loading students...</p>
-              </div>
-            ) : students.length === 0 ? (
-              <div className="text-center py-8">
-                <p className="text-muted-foreground">No students found in your organization.</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {students.map((student, index) => (
-                  <div
-                    key={student.id}
-                    className="flex items-center justify-between p-4 bg-muted/30 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
-                    onClick={() => {
-                      setSelectedStudent(student)
-                      setShowStudentDetails(true)
-                    }}
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center text-sm font-medium">
-                        #{index + 1}
-                      </div>
-                      <div>
-                        <h3 className="font-medium">{student.display_name}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          Level {student.level} • {student.region_district}, {student.region_state}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <div className="text-right">
-                        <div className="font-medium text-primary">{student.eco_points} points</div>
-                        <div className="text-sm text-muted-foreground">
-                          {student.completed_lessons}L • {student.completed_missions}M
-                        </div>
-                      </div>
-                      <Badge variant="outline">View Details</Badge>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </EcoCardContent>
-        </EcoCard>
-
-        {/* Organization Leaderboard */}
-        <OrganizationLeaderboard />
-
-        {/* Student Details Modal */}
-        {showStudentDetails && selectedStudent && (
-          <StudentDetailsModal
-            student={selectedStudent}
-            organizationName={organizationProfile.organization_name}
-            onClose={() => {
-              setShowStudentDetails(false)
-              setSelectedStudent(null)
-            }}
-          />
+        {/* Recent Activity */}
+        {organizationProfile.organization_name && (
+          <RecentActivity organizationName={organizationProfile.organization_name} />
         )}
+
+        {/* Students Modal */}
+        <StudentsModal
+          isOpen={showStudentsModal}
+          onClose={() => setShowStudentsModal(false)}
+          students={students}
+          organizationName={organizationProfile.organization_name}
+        />
 
         {/* Settings Modal */}
         <OrganizationSettings

@@ -2,12 +2,14 @@ import { useState } from "react"
 import { StatsCard } from "@/components/ui/stats-card"
 import { BookOpen, Target, Award, TrendingUp } from "lucide-react"
 import { useProfile } from "@/hooks/useProfile"
+import { useUserBadges } from "@/hooks/useUserBadges"
 import { BadgesList } from "./BadgesList"
 import { CompletedLessonsList } from "./CompletedLessonsList"
 import { CompletedMissionsList } from "./CompletedMissionsList"
 
 export function DashboardStats() {
   const { profile } = useProfile()
+  const { badgeCount } = useUserBadges()
   const [showBadges, setShowBadges] = useState(false)
   const [showCompletedLessons, setShowCompletedLessons] = useState(false)
   const [showCompletedMissions, setShowCompletedMissions] = useState(false)
@@ -34,7 +36,7 @@ export function DashboardStats() {
         <div onClick={() => setShowBadges(true)} className="cursor-pointer">
           <StatsCard
             title="Badges Earned"
-            value={profile?.badges?.length?.toString() || "0"}
+            value={badgeCount.toString()}
             description="Next: Tree Hugger"
             icon={Award}
           />

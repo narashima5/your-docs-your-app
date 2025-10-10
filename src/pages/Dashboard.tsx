@@ -1,6 +1,7 @@
 import { UserHeader } from "@/components/dashboard/user-header"
 import { DashboardStats } from "@/components/dashboard/dashboard-stats"
 import { NavigationCards } from "@/components/dashboard/navigation-cards"
+import { ContinueLearning } from "@/components/dashboard/ContinueLearning"
 import { OrganizationDashboard } from "@/components/dashboard/OrganizationDashboard"
 import { useProfile } from "@/hooks/useProfile"
 
@@ -19,6 +20,9 @@ export default function Dashboard() {
         
         {/* Dashboard Stats */}
         <DashboardStats />
+        
+        {/* Continue Learning */}
+        <ContinueLearning />
         
         {/* Navigation Cards */}
         <NavigationCards />

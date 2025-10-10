@@ -19,7 +19,7 @@ interface LeaderboardEntry {
 }
 
 export function Leaderboard() {
-  const [selectedRegion, setSelectedRegion] = useState<"district" | "state" | "country">("country")
+  const [selectedRegion, setSelectedRegion] = useState<"district" | "state" | "country" | "organization">("country")
   const { user } = useAuth()
 
   const { data: leaderboard, isLoading } = useQuery({
@@ -30,20 +30,25 @@ export function Leaderboard() {
       // Get current user's region info
       const { data: userProfile } = await supabase
         .from('profiles')
-        .select('region_district, region_state, region_country')
+        .select('region_district, region_state, region_country, organization_name')
         .eq('user_id', user.id)
         .single()
 
       if (!userProfile) return []
 
-      // Fix leaderboard query to show all students properly
+      // Query to show all students from selected region
       let query = supabase
         .from('profiles')
         .select('user_id, display_name, eco_points, completed_missions, region_district, region_state, region_country')
-        .eq('role', 'student') // Only show students in leaderboard
+        .eq('role', 'student')
 
       // Filter by region
       switch (selectedRegion) {
+        case 'organization':
+          if (userProfile.organization_name) {
+            query = query.eq('organization_name', userProfile.organization_name)
+          }
+          break
         case 'district':
           if (userProfile.region_district) {
             query = query.eq('region_district', userProfile.region_district)
@@ -63,8 +68,7 @@ export function Leaderboard() {
 
       const { data, error } = await query
         .order('eco_points', { ascending: false })
-        .order('updated_at', { ascending: true }) // First to complete with same points ranks higher
-        .limit(50)
+        .order('updated_at', { ascending: true })
 
       if (error) throw error
 
@@ -128,29 +132,15 @@ export function Leaderboard() {
             Regional Leaderboard
           </EcoCardTitle>
           
-          <Select value={selectedRegion} onValueChange={(value: "district" | "state" | "country") => setSelectedRegion(value)}>
+          <Select value={selectedRegion} onValueChange={(value: "district" | "state" | "country" | "organization") => setSelectedRegion(value)}>
             <SelectTrigger className="w-40">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="district">
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4" />
-                  District
-                </div>
-              </SelectItem>
-              <SelectItem value="state">
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4" />
-                  State
-                </div>
-              </SelectItem>
-              <SelectItem value="country">
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4" />
-                  Country
-                </div>
-              </SelectItem>
+              <SelectItem value="organization">Organization</SelectItem>
+              <SelectItem value="district">District</SelectItem>
+              <SelectItem value="state">State</SelectItem>
+              <SelectItem value="country">Country</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -180,9 +170,9 @@ export function Leaderboard() {
           </div>
         )}
 
-        {/* Top 10 Leaderboard */}
-        <div className="space-y-2">
-          {leaderboard?.slice(0, 10).map((entry) => (
+        {/* Full Leaderboard */}
+        <div className="space-y-2 max-h-[600px] overflow-y-auto">
+          {leaderboard?.map((entry) => (
             <div
               key={entry.user_id}
               className={`p-4 rounded-lg border ${getRankColor(entry.rank)} ${

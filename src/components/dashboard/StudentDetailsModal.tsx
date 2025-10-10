@@ -49,6 +49,7 @@ export function StudentDetailsModal({ student, organizationName, onClose }: Stud
   const queryClient = useQueryClient()
   const [reviewNotes, setReviewNotes] = useState("")
   const [selectedSubmission, setSelectedSubmission] = useState<MissionSubmission | null>(null)
+  const [viewingVideo, setViewingVideo] = useState<string | null>(null)
 
   // Fetch student's mission submissions
   const { data: submissions = [], isLoading } = useQuery({
@@ -282,11 +283,27 @@ export function StudentDetailsModal({ student, organizationName, onClose }: Stud
                             <div className="mb-3">
                               <p className="text-sm font-medium mb-1">Files:</p>
                               <div className="space-y-1">
-                                {submission.submission_files.map((file, index) => (
-                                  <p key={index} className="text-sm text-blue-600 hover:underline cursor-pointer">
-                                    📎 {file}
-                                  </p>
-                                ))}
+                                {submission.submission_files.map((file, index) => {
+                                  const isVideo = file.match(/\.(mp4|webm|ogg|mov)$/i)
+                                  return (
+                                    <div key={index} className="flex items-center gap-2">
+                                      {isVideo ? (
+                                        <EcoButton
+                                          variant="outline"
+                                          size="sm"
+                                          onClick={() => setViewingVideo(file)}
+                                        >
+                                          <FileText className="h-4 w-4 mr-2" />
+                                          View Video {index + 1}
+                                        </EcoButton>
+                                      ) : (
+                                        <p className="text-sm text-blue-600 hover:underline cursor-pointer">
+                                          📎 {file}
+                                        </p>
+                                      )}
+                                    </div>
+                                  )
+                                })}
                               </div>
                             </div>
                           )}
@@ -372,6 +389,24 @@ export function StudentDetailsModal({ student, organizationName, onClose }: Stud
                     {JSON.stringify(selectedSubmission.submission_data)}
                   </p>
                 </div>
+                {selectedSubmission.submission_files?.some(f => f.match(/\.(mp4|webm|ogg|mov)$/i)) && (
+                  <div>
+                    <h4 className="font-medium mb-2">Submission Videos</h4>
+                    <div className="space-y-2">
+                      {selectedSubmission.submission_files
+                        .filter(f => f.match(/\.(mp4|webm|ogg|mov)$/i))
+                        .map((video, index) => (
+                          <video 
+                            key={index}
+                            src={video} 
+                            controls 
+                            className="w-full rounded-lg"
+                          />
+                        ))
+                      }
+                    </div>
+                  </div>
+                )}
                 <div>
                   <label className="block text-sm font-medium mb-2">Review Notes</label>
                   <Textarea
@@ -400,6 +435,25 @@ export function StudentDetailsModal({ student, organizationName, onClose }: Stud
                     Reject
                   </EcoButton>
                 </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
+
+        {/* Video Viewer Modal */}
+        {viewingVideo && (
+          <Dialog open={true} onOpenChange={() => setViewingVideo(null)}>
+            <DialogContent className="max-w-4xl">
+              <DialogHeader>
+                <DialogTitle>Submission Video</DialogTitle>
+              </DialogHeader>
+              <div>
+                <video 
+                  src={viewingVideo} 
+                  controls 
+                  className="w-full rounded-lg"
+                  autoPlay
+                />
               </div>
             </DialogContent>
           </Dialog>
