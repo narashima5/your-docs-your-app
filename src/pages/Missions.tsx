@@ -41,6 +41,8 @@ export default function Missions() {
   const [showSubmissionForm, setShowSubmissionForm] = useState<string | null>(null)
   const [submissionFiles, setSubmissionFiles] = useState<File[]>([])
   const [submissionDescription, setSubmissionDescription] = useState("")
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [isUploading, setIsUploading] = useState(false)
   const [showLeaderboard, setShowLeaderboard] = useState(false)
   const [selectedMission, setSelectedMission] = useState<any>(null)
   const [showBadges, setShowBadges] = useState(false)
@@ -66,6 +68,9 @@ export default function Missions() {
       return
     }
 
+    setIsUploading(true)
+    setUploadProgress(0)
+
     try {
       // Upload files to Supabase storage
       const { supabase } = await import("@/integrations/supabase/client")
@@ -79,8 +84,12 @@ export default function Missions() {
       const fileUrls: string[] = []
       let videoUrl: string | null = null
 
+      // Calculate progress per file
+      const progressPerFile = 100 / submissionFiles.length
+
       // Upload each file to storage
-      for (const file of submissionFiles) {
+      for (let i = 0; i < submissionFiles.length; i++) {
+        const file = submissionFiles[i]
         const timestamp = Date.now()
         // Sanitize filename: remove special characters and spaces
         const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
@@ -97,6 +106,9 @@ export default function Missions() {
         if (uploadError) {
           throw uploadError
         }
+
+        // Update progress
+        setUploadProgress((i + 1) * progressPerFile)
 
         // Get public URL
         const { data: { publicUrl } } = supabase.storage
@@ -126,6 +138,9 @@ export default function Missions() {
       setSubmissionDescription("")
     } catch (error) {
       console.error("Error uploading files:", error)
+    } finally {
+      setIsUploading(false)
+      setUploadProgress(0)
     }
   }
 
@@ -134,7 +149,7 @@ export default function Missions() {
       e.stopPropagation()
       if (mission.status === "not_started") {
         startMission(mission.id)
-      } else if (mission.status === "in_progress") {
+      } else if (mission.status === "in_progress" || mission.status === "rejected") {
         setShowSubmissionForm(mission.id)
       }
     }
@@ -404,14 +419,36 @@ export default function Missions() {
                     rows={4}
                   />
                 </div>
+
+                {isUploading && (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Uploading files...</span>
+                      <span className="font-medium">{Math.round(uploadProgress)}%</span>
+                    </div>
+                    <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
+                      <div 
+                        className="h-full bg-primary transition-all duration-300 ease-out"
+                        style={{ width: `${uploadProgress}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
                 
                 <div className="flex gap-3">
                   <EcoButton
                     variant="eco"
                     onClick={() => handleSubmissionSubmit(showSubmissionForm)}
-                    disabled={submissionFiles.length === 0 || !submissionDescription.trim()}
+                    disabled={submissionFiles.length === 0 || !submissionDescription.trim() || isUploading}
                   >
-                    Submit Mission
+                    {isUploading ? (
+                      <>
+                        <Loader className="h-4 w-4 mr-2 animate-spin" />
+                        Uploading...
+                      </>
+                    ) : (
+                      'Submit Mission'
+                    )}
                   </EcoButton>
                   <EcoButton
                     variant="outline"
@@ -420,6 +457,7 @@ export default function Missions() {
                       setSubmissionFiles([])
                       setSubmissionDescription("")
                     }}
+                    disabled={isUploading}
                   >
                     Cancel
                   </EcoButton>
