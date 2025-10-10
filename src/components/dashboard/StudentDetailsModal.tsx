@@ -309,7 +309,18 @@ export function StudentDetailsModal({ student, organizationName, onClose }: Stud
                           onClick={() => setSelectedSubmission(submission)}
                           disabled={!submission.video_url}
                         >
-                          {submission.video_url ? 'Review' : 'No Video - Cannot Review'}
+                          {submission.video_url ? 'Review' : 'No Video - Cannot Approve'}
+                        </EcoButton>
+                        <EcoButton
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedSubmission(submission)
+                            setReviewNotes("")
+                          }}
+                        >
+                          <XCircle className="h-4 w-4 mr-2" />
+                          Reject
                         </EcoButton>
                       </div>
                     </EcoCardContent>
@@ -387,8 +398,14 @@ export function StudentDetailsModal({ student, organizationName, onClose }: Stud
                     <video 
                       src={selectedSubmission.video_url} 
                       controls 
-                      className="w-full rounded-lg"
-                    />
+                      className="w-full rounded-lg max-h-[500px]"
+                      preload="metadata"
+                    >
+                      <source src={selectedSubmission.video_url} type="video/mp4" />
+                      <source src={selectedSubmission.video_url} type="video/webm" />
+                      <source src={selectedSubmission.video_url} type="video/quicktime" />
+                      Your browser does not support the video tag.
+                    </video>
                   </div>
                 )}
 
@@ -454,9 +471,15 @@ export function StudentDetailsModal({ student, organizationName, onClose }: Stud
                 <video 
                   src={viewingVideo} 
                   controls 
-                  className="w-full rounded-lg"
+                  className="w-full rounded-lg max-h-[600px]"
                   autoPlay
-                />
+                  preload="metadata"
+                >
+                  <source src={viewingVideo} type="video/mp4" />
+                  <source src={viewingVideo} type="video/webm" />
+                  <source src={viewingVideo} type="video/quicktime" />
+                  Your browser does not support the video tag.
+                </video>
               </div>
             </DialogContent>
           </Dialog>

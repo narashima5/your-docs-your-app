@@ -13,7 +13,15 @@ interface FileUploadProps {
 
 export function FileUpload({ 
   onFilesChange, 
-  acceptedTypes = ["image/*", "video/*"], 
+  acceptedTypes = [
+    "image/*", 
+    "video/mp4",
+    "video/webm",
+    "video/ogg",
+    "video/quicktime",
+    "video/x-msvideo",
+    "video/x-matroska"
+  ], 
   maxFiles = 5,
   maxSizePerFile = 50 
 }: FileUploadProps) {
@@ -135,7 +143,7 @@ export function FileUpload({
             Drag and drop images or videos, or click to browse
           </p>
           <p className="text-sm text-muted-foreground">
-            Supports images and videos up to {maxSizePerFile}MB each (max {maxFiles} files)
+            Supports images and videos (MP4, WebM, MOV, AVI, MKV) up to {maxSizePerFile}MB each (max {maxFiles} files)
           </p>
           
           <input
