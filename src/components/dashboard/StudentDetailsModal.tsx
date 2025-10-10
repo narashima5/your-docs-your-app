@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -52,6 +52,8 @@ export function StudentDetailsModal({ student, organizationName, onClose }: Stud
   const [reviewNotes, setReviewNotes] = useState("")
   const [selectedSubmission, setSelectedSubmission] = useState<MissionSubmission | null>(null)
   const [viewingVideo, setViewingVideo] = useState<string | null>(null)
+  const [resolvedVideoUrls, setResolvedVideoUrls] = useState<Record<string, string>>({})
+
 
   // Fetch student's mission submissions
   const { data: submissions = [], isLoading } = useQuery({
@@ -73,6 +75,46 @@ export function StudentDetailsModal({ student, organizationName, onClose }: Stud
       return data as MissionSubmission[]
     },
   })
+
+  useEffect(() => {
+    if (!submissions || submissions.length === 0) {
+      setResolvedVideoUrls({})
+      return
+    }
+    let isCancelled = false
+    const resolveUrls = async () => {
+      const map: Record<string, string> = {}
+      for (const s of submissions) {
+        if (!s.video_url) continue
+        if (s.video_url.startsWith('http')) {
+          const m = s.video_url.match(/\/object\/(public|sign)\/mission-videos\/(.+)$/)
+          if (m && m[1] === 'public') {
+            const key = m[2]
+            const { data, error } = await supabase.storage
+              .from('mission-videos')
+              .createSignedUrl(key, 60 * 60)
+            if (!error && data?.signedUrl) {
+              map[s.id] = data.signedUrl
+            } else {
+              map[s.id] = s.video_url
+            }
+          } else {
+            map[s.id] = s.video_url
+          }
+        } else {
+          const { data, error } = await supabase.storage
+            .from('mission-videos')
+            .createSignedUrl(s.video_url, 60 * 60)
+          if (!error && data?.signedUrl) {
+            map[s.id] = data.signedUrl
+          }
+        }
+      }
+      if (!isCancelled) setResolvedVideoUrls(map)
+    }
+    resolveUrls()
+    return () => { isCancelled = true }
+  }, [submissions])
 
   // Get student's leaderboard position
   const { data: leaderboardPosition } = useQuery({
@@ -284,7 +326,7 @@ export function StudentDetailsModal({ student, organizationName, onClose }: Stud
                               <EcoButton
                                 variant="outline"
                                 size="sm"
-                                onClick={() => setViewingVideo(submission.video_url)}
+                                onClick={() => setViewingVideo(resolvedVideoUrls[submission.id] || submission.video_url)}
                               >
                                 <FileText className="h-4 w-4 mr-2" />
                                 View Submitted Video
@@ -401,10 +443,10 @@ export function StudentDetailsModal({ student, organizationName, onClose }: Stud
                       preload="metadata"
                       crossOrigin="anonymous"
                     >
-                      <source src={selectedSubmission.video_url} type="video/mp4" />
-                      <source src={selectedSubmission.video_url} type="video/webm" />
-                      <source src={selectedSubmission.video_url} type="video/ogg" />
-                      <source src={selectedSubmission.video_url} type="video/quicktime" />
+                      <source src={resolvedVideoUrls[selectedSubmission.id] || selectedSubmission.video_url} type="video/mp4" />
+                      <source src={resolvedVideoUrls[selectedSubmission.id] || selectedSubmission.video_url} type="video/webm" />
+                      <source src={resolvedVideoUrls[selectedSubmission.id] || selectedSubmission.video_url} type="video/ogg" />
+                      <source src={resolvedVideoUrls[selectedSubmission.id] || selectedSubmission.video_url} type="video/quicktime" />
                       Your browser does not support the video tag.
                     </video>
                   </div>

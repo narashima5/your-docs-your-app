@@ -117,9 +117,9 @@ export default function Missions() {
 
         fileUrls.push(publicUrl)
 
-        // If this is a video file, set it as the video URL
+        // If this is a video file, set it as the video key (storage path)
         if (file.type.startsWith('video/') && !videoUrl) {
-          videoUrl = publicUrl
+          videoUrl = fileName
         }
       }
       
