@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_log: {
+        Row: {
+          activity_message: string
+          activity_type: string
+          created_at: string
+          id: string
+          metadata: Json | null
+          organization_code: string
+          user_id: string
+        }
+        Insert: {
+          activity_message: string
+          activity_type: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          organization_code: string
+          user_id: string
+        }
+        Update: {
+          activity_message?: string
+          activity_type?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          organization_code?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       badges: {
         Row: {
           category: string
@@ -182,8 +212,10 @@ export type Database = {
       }
       mission_submissions: {
         Row: {
+          completion_count: number | null
           created_at: string
           id: string
+          iteration: number | null
           mission_id: string
           points_awarded: number | null
           reviewed_at: string | null
@@ -194,10 +226,13 @@ export type Database = {
           submitted_at: string | null
           updated_at: string
           user_id: string
+          video_url: string | null
         }
         Insert: {
+          completion_count?: number | null
           created_at?: string
           id?: string
+          iteration?: number | null
           mission_id: string
           points_awarded?: number | null
           reviewed_at?: string | null
@@ -208,10 +243,13 @@ export type Database = {
           submitted_at?: string | null
           updated_at?: string
           user_id: string
+          video_url?: string | null
         }
         Update: {
+          completion_count?: number | null
           created_at?: string
           id?: string
+          iteration?: number | null
           mission_id?: string
           points_awarded?: number | null
           reviewed_at?: string | null
@@ -222,6 +260,7 @@ export type Database = {
           submitted_at?: string | null
           updated_at?: string
           user_id?: string
+          video_url?: string | null
         }
         Relationships: [
           {
@@ -289,6 +328,27 @@ export type Database = {
           },
         ]
       }
+      organization_memberships: {
+        Row: {
+          created_at: string
+          organization_code: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          organization_code: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          organization_code?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -302,6 +362,7 @@ export type Database = {
           id: string
           last_activity_date: string | null
           level: number
+          organization_code: string | null
           organization_name: string | null
           region_country: string | null
           region_district: string | null
@@ -323,6 +384,7 @@ export type Database = {
           id?: string
           last_activity_date?: string | null
           level?: number
+          organization_code?: string | null
           organization_name?: string | null
           region_country?: string | null
           region_district?: string | null
@@ -344,6 +406,7 @@ export type Database = {
           id?: string
           last_activity_date?: string | null
           level?: number
+          organization_code?: string | null
           organization_name?: string | null
           region_country?: string | null
           region_district?: string | null
@@ -405,7 +468,42 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      generate_organization_code: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      get_student_leaderboard: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          completed_lessons: number
+          completed_missions: number
+          display_name: string
+          eco_points: number
+          level: number
+          organization_code: string
+          organization_name: string
+          region_country: string
+          region_district: string
+          region_state: string
+          user_id: string
+        }[]
+      }
+      get_student_leaderboard_by_scope: {
+        Args: { scope: string }
+        Returns: {
+          completed_lessons: number
+          completed_missions: number
+          display_name: string
+          eco_points: number
+          level: number
+          organization_code: string
+          organization_name: string
+          region_country: string
+          region_district: string
+          region_state: string
+          user_id: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
