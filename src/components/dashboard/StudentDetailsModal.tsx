@@ -396,13 +396,14 @@ export function StudentDetailsModal({ student, organizationName, onClose }: Stud
                   <div>
                     <h4 className="font-medium mb-2">Submission Video</h4>
                     <video 
-                      src={selectedSubmission.video_url} 
                       controls 
                       className="w-full rounded-lg max-h-[500px]"
                       preload="metadata"
+                      crossOrigin="anonymous"
                     >
                       <source src={selectedSubmission.video_url} type="video/mp4" />
                       <source src={selectedSubmission.video_url} type="video/webm" />
+                      <source src={selectedSubmission.video_url} type="video/ogg" />
                       <source src={selectedSubmission.video_url} type="video/quicktime" />
                       Your browser does not support the video tag.
                     </video>
@@ -469,14 +470,15 @@ export function StudentDetailsModal({ student, organizationName, onClose }: Stud
               </DialogHeader>
               <div>
                 <video 
-                  src={viewingVideo} 
                   controls 
                   className="w-full rounded-lg max-h-[600px]"
                   autoPlay
                   preload="metadata"
+                  crossOrigin="anonymous"
                 >
                   <source src={viewingVideo} type="video/mp4" />
                   <source src={viewingVideo} type="video/webm" />
+                  <source src={viewingVideo} type="video/ogg" />
                   <source src={viewingVideo} type="video/quicktime" />
                   Your browser does not support the video tag.
                 </video>

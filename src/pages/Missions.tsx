@@ -82,11 +82,17 @@ export default function Missions() {
       // Upload each file to storage
       for (const file of submissionFiles) {
         const timestamp = Date.now()
-        const fileName = `${userId}/${timestamp}-${file.name}`
+        // Sanitize filename: remove special characters and spaces
+        const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
+        const fileName = `${userId}/${timestamp}-${sanitizedName}`
         
         const { error: uploadError } = await supabase.storage
           .from('mission-videos')
-          .upload(fileName, file)
+          .upload(fileName, file, {
+            contentType: file.type,
+            cacheControl: '3600',
+            upsert: false
+          })
 
         if (uploadError) {
           throw uploadError
