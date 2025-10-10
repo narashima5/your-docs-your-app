@@ -106,7 +106,9 @@ export function OrganizationDashboard() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-foreground">{organizationProfile.organization_name}</h1>
-            <p className="text-muted-foreground mt-1">Organization Dashboard</p>
+            <p className="text-muted-foreground mt-1">
+              Organization Dashboard • Level {organizationProfile.level} • {organizationProfile.eco_points} Eco Points
+            </p>
           </div>
           <div className="flex items-center gap-2">
             <EcoButton variant="outline" onClick={() => setShowSettings(true)}>

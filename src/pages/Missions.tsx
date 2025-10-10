@@ -69,13 +69,18 @@ export default function Missions() {
     // In real app, files would be uploaded to storage first
     const fileUrls = submissionFiles.map(file => URL.createObjectURL(file))
     
+    // Find the first video file for video_url
+    const videoFile = submissionFiles.find(file => file.type.startsWith('video/'))
+    const videoUrl = videoFile ? URL.createObjectURL(videoFile) : null
+    
     submitMission({
       missionId,
       submissionData: {
         files: fileUrls,
         description: submissionDescription,
         timestamp: new Date().toISOString()
-      }
+      },
+      videoUrl
     })
 
     setShowSubmissionForm(null)

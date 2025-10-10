@@ -8,8 +8,9 @@ import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { User, TrendingUp, FileText, CheckCircle, XCircle, Clock, Award, BookOpen, Target } from "lucide-react"
+import { User, TrendingUp, FileText, CheckCircle, XCircle, Clock, Award, BookOpen, Target, AlertCircle } from "lucide-react"
 import { toast } from "sonner"
+import { SubmissionDetailsDisplay } from "./SubmissionDetailsDisplay"
 
 interface Student {
   id: string
@@ -30,6 +31,7 @@ interface MissionSubmission {
   status: string
   submission_data: any
   submission_files: string[]
+  video_url: string | null
   submitted_at: string
   reviewer_notes: string | null
   points_awarded: number
@@ -267,44 +269,33 @@ export function StudentDetailsModal({ student, organizationName, onClose }: Stud
                 {submissions.filter(s => s.status === 'submitted').map((submission) => (
                   <EcoCard key={submission.id}>
                     <EcoCardContent className="p-4">
-                      <div className="flex items-start justify-between">
+                      <div className="flex items-start justify-between gap-4">
                         <div className="flex-1">
-                          <h4 className="font-medium mb-2">{submission.missions.title}</h4>
-                          <p className="text-sm text-muted-foreground mb-3">
-                            Submitted: {new Date(submission.submitted_at).toLocaleDateString()}
-                          </p>
-                          <div className="mb-3">
-                            <p className="text-sm font-medium mb-1">Submission Details:</p>
-                            <p className="text-sm text-muted-foreground">
-                              {JSON.stringify(submission.submission_data)}
-                            </p>
-                          </div>
-                          {submission.submission_files?.length > 0 && (
-                            <div className="mb-3">
-                              <p className="text-sm font-medium mb-1">Files:</p>
-                              <div className="space-y-1">
-                                {submission.submission_files.map((file, index) => {
-                                  const isVideo = file.match(/\.(mp4|webm|ogg|mov)$/i)
-                                  return (
-                                    <div key={index} className="flex items-center gap-2">
-                                      {isVideo ? (
-                                        <EcoButton
-                                          variant="outline"
-                                          size="sm"
-                                          onClick={() => setViewingVideo(file)}
-                                        >
-                                          <FileText className="h-4 w-4 mr-2" />
-                                          View Video {index + 1}
-                                        </EcoButton>
-                                      ) : (
-                                        <p className="text-sm text-blue-600 hover:underline cursor-pointer">
-                                          📎 {file}
-                                        </p>
-                                      )}
-                                    </div>
-                                  )
-                                })}
-                              </div>
+                          <h4 className="font-medium mb-3">{submission.missions.title}</h4>
+                          
+                          <SubmissionDetailsDisplay
+                            submissionData={submission.submission_data}
+                            submittedAt={submission.submitted_at}
+                          />
+
+                          {/* Video Preview */}
+                          {submission.video_url && (
+                            <div className="mt-4">
+                              <EcoButton
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setViewingVideo(submission.video_url)}
+                              >
+                                <FileText className="h-4 w-4 mr-2" />
+                                View Submitted Video
+                              </EcoButton>
+                            </div>
+                          )}
+
+                          {!submission.video_url && (
+                            <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
+                              <AlertCircle className="h-4 w-4" />
+                              <span>No video submitted - approval not possible</span>
                             </div>
                           )}
                         </div>
@@ -316,8 +307,9 @@ export function StudentDetailsModal({ student, organizationName, onClose }: Stud
                         <EcoButton
                           size="sm"
                           onClick={() => setSelectedSubmission(submission)}
+                          disabled={!submission.video_url}
                         >
-                          Review
+                          {submission.video_url ? 'Review' : 'No Video - Cannot Review'}
                         </EcoButton>
                       </div>
                     </EcoCardContent>
@@ -383,30 +375,39 @@ export function StudentDetailsModal({ student, organizationName, onClose }: Stud
                 <DialogTitle>Review Submission: {selectedSubmission.missions.title}</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
-                <div>
-                  <h4 className="font-medium mb-2">Submission Details</h4>
-                  <p className="text-sm text-muted-foreground">
-                    {JSON.stringify(selectedSubmission.submission_data)}
-                  </p>
-                </div>
-                {selectedSubmission.submission_files?.some(f => f.match(/\.(mp4|webm|ogg|mov)$/i)) && (
+                <SubmissionDetailsDisplay
+                  submissionData={selectedSubmission.submission_data}
+                  submittedAt={selectedSubmission.submitted_at}
+                />
+
+                {/* Video Preview */}
+                {selectedSubmission.video_url && (
                   <div>
-                    <h4 className="font-medium mb-2">Submission Videos</h4>
-                    <div className="space-y-2">
-                      {selectedSubmission.submission_files
-                        .filter(f => f.match(/\.(mp4|webm|ogg|mov)$/i))
-                        .map((video, index) => (
-                          <video 
-                            key={index}
-                            src={video} 
-                            controls 
-                            className="w-full rounded-lg"
-                          />
-                        ))
-                      }
+                    <h4 className="font-medium mb-2">Submission Video</h4>
+                    <video 
+                      src={selectedSubmission.video_url} 
+                      controls 
+                      className="w-full rounded-lg"
+                    />
+                  </div>
+                )}
+
+                {!selectedSubmission.video_url && (
+                  <div className="p-4 bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                    <div className="flex items-start gap-3">
+                      <AlertCircle className="h-5 w-5 text-yellow-600 dark:text-yellow-500 mt-0.5" />
+                      <div>
+                        <h4 className="font-medium text-yellow-900 dark:text-yellow-100 mb-1">
+                          No Video Submitted
+                        </h4>
+                        <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                          This mission requires video proof for approval. The student has not uploaded a video yet.
+                        </p>
+                      </div>
                     </div>
                   </div>
                 )}
+
                 <div>
                   <label className="block text-sm font-medium mb-2">Review Notes</label>
                   <Textarea
@@ -416,10 +417,11 @@ export function StudentDetailsModal({ student, organizationName, onClose }: Stud
                     rows={3}
                   />
                 </div>
+
                 <div className="flex gap-3">
                   <EcoButton
                     onClick={() => handleReviewSubmission(selectedSubmission, 'approved')}
-                    disabled={reviewSubmissionMutation.isPending}
+                    disabled={reviewSubmissionMutation.isPending || !selectedSubmission.video_url}
                     className="flex-1"
                   >
                     <CheckCircle className="h-4 w-4 mr-2" />

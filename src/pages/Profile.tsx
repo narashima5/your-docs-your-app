@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useProfile } from "@/hooks/useProfile"
 import { useAuth } from "@/contexts/AuthContext"
 import { EcoCard, EcoCardContent, EcoCardHeader, EcoCardTitle } from "@/components/ui/eco-card"
@@ -57,8 +57,8 @@ const { data: userRank } = useQuery({
 })
 
   // Initialize edit form when profile loads
-  useState(() => {
-    if (profile) {
+  useEffect(() => {
+    if (profile && !isEditing) {
       setEditedProfile({
         display_name: profile.display_name || "",
         region_district: profile.region_district || "",
@@ -66,7 +66,7 @@ const { data: userRank } = useQuery({
         region_country: profile.region_country || "India"
       })
     }
-  })
+  }, [profile, isEditing])
 
   const handleEdit = () => {
     setIsEditing(true)

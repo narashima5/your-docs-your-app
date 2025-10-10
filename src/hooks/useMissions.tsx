@@ -114,9 +114,10 @@ export function useMissions() {
   })
 
   const submitMissionMutation = useMutation({
-    mutationFn: async ({ missionId, submissionData }: {
+    mutationFn: async ({ missionId, submissionData, videoUrl }: {
       missionId: string
       submissionData: any
+      videoUrl?: string | null
     }) => {
       if (!user) throw new Error('No user')
 
@@ -127,6 +128,7 @@ export function useMissions() {
           mission_id: missionId,
           status: 'submitted',
           submission_data: submissionData,
+          video_url: videoUrl || null,
           submitted_at: new Date().toISOString()
         }, { onConflict: 'user_id, mission_id' })
         .select()
