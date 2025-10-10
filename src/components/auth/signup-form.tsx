@@ -21,6 +21,7 @@ interface FormData {
   country: string
   role: string
   gender: string
+  organizationCode: string
 }
 
 export function SignupForm() {
@@ -35,7 +36,8 @@ export function SignupForm() {
     state: "",
     country: "India",
     role: "student",
-    gender: ""
+    gender: "",
+    organizationCode: ""
   })
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
@@ -95,27 +97,41 @@ export function SignupForm() {
       return
     }
 
-    // Final submission (step 3)
-    if (!formData.role || !formData.gender) {
-      toast({
-        title: "Missing Information", 
-        description: "Please select your role and gender",
-        variant: "destructive"
-      })
-      return
-    }
+// Final submission (step 3)
+if (!formData.role || !formData.gender) {
+  toast({
+    title: "Missing Information", 
+    description: "Please select your role and gender",
+    variant: "destructive"
+  })
+  return
+}
+
+// Require organization code for students
+if (formData.role === 'student') {
+  const code = formData.organizationCode.trim()
+  if (!/^\d{4}$/.test(code)) {
+    toast({
+      title: "Invalid Organization Code",
+      description: "Enter the 4-digit code provided by your organization",
+      variant: "destructive"
+    })
+    return
+  }
+}
 
     setIsLoading(true)
     
-    const { error } = await signUp(formData.email, formData.password, {
-      display_name: formData.fullName,
-      role: formData.role,
-      organization_name: formData.role === 'organization' ? formData.fullName : formData.school,
-      region_district: formData.district,
-      region_state: formData.state,
-      region_country: formData.country,
-      gender: formData.gender
-    })
+const { error } = await signUp(formData.email, formData.password, {
+  display_name: formData.fullName,
+  role: formData.role,
+  organization_name: formData.role === 'organization' ? formData.fullName : formData.school,
+  region_district: formData.district,
+  region_state: formData.state,
+  region_country: formData.country,
+  gender: formData.gender,
+  organization_code: formData.role === 'student' ? formData.organizationCode.trim() : undefined,
+})
     
     if (error) {
       toast({
@@ -327,6 +343,25 @@ export function SignupForm() {
                   </SelectContent>
                 </Select>
               </div>
+
+              {formData.role === 'student' && (
+                <div className="space-y-2">
+                  <Label htmlFor="organizationCode">Organization Code (4 digits) *</Label>
+                  <Input
+                    id="organizationCode"
+                    inputMode="numeric"
+                    pattern="\\d{4}"
+                    maxLength={4}
+                    placeholder="e.g., 1234"
+                    value={formData.organizationCode}
+                    onChange={(e) => {
+                      const onlyDigits = e.target.value.replace(/[^0-9]/g, '').slice(0,4)
+                      handleChange('organizationCode', onlyDigits)
+                    }}
+                    required
+                  />
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Label htmlFor="gender">Gender *</Label>

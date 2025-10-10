@@ -20,6 +20,7 @@ interface Profile {
   role: string
   gender: string | null
   organization_name: string | null
+  organization_code: string | null
   created_at: string
   updated_at: string
 }

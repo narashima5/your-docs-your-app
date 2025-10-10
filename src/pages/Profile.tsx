@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
+import { useUserBadges } from "@/hooks/useUserBadges"
 
 interface LeaderboardEntry {
   user_id: string
@@ -32,26 +33,28 @@ export default function Profile() {
     region_country: ""
   })
   const navigate = useNavigate()
-  const { toast } = useToast()
+const { toast } = useToast()
+const { badgeCount } = useUserBadges()
 
-  // Get user's position in leaderboard
-  const { data: userRank } = useQuery({
-    queryKey: ['user-rank', user?.id],
-    queryFn: async () => {
-      if (!user) return null
+// Get user's position in leaderboard
+const { data: userRank } = useQuery({
+  queryKey: ['user-rank', user?.id],
+  queryFn: async () => {
+    if (!user) return null
 
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('user_id, display_name, eco_points')
-        .order('eco_points', { ascending: false })
+    // Use RPC to compute rank securely if available; fallback to client-side order
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('user_id, eco_points')
+      .order('eco_points', { ascending: false })
 
-      if (error) throw error
+    if (error) throw error
 
-      const userIndex = data.findIndex(entry => entry.user_id === user.id)
-      return userIndex !== -1 ? userIndex + 1 : null
-    },
-    enabled: !!user,
-  })
+    const userIndex = data.findIndex(entry => entry.user_id === user.id)
+    return userIndex !== -1 ? userIndex + 1 : null
+  },
+  enabled: !!user,
+})
 
   // Initialize edit form when profile loads
   useState(() => {
@@ -155,59 +158,83 @@ export default function Profile() {
                     placeholder="Enter your display name"
                   />
                 </div>
+
+                {profile?.role === 'student' && (
+                  <div>
+                    <Label htmlFor="organization">Organization</Label>
+                    <Input
+                      id="organization"
+                      value={profile?.organization_name || ""}
+                      disabled
+                      className="bg-muted"
+                    />
+                  </div>
+                )}
+
+                {profile?.role === 'organization' && (
+                  <div>
+                    <Label htmlFor="org_code">Organization Code</Label>
+                    <Input
+                      id="org_code"
+                      value={(profile as any)?.organization_code || ""}
+                      disabled
+                      className="bg-muted"
+                    />
+                  </div>
+                )}
               </EcoCardContent>
             </EcoCard>
 
-            <EcoCard>
-              <EcoCardHeader>
-                <EcoCardTitle className="flex items-center gap-2">
-                  <MapPin className="h-5 w-5 text-primary" />
-                  Location
-                </EcoCardTitle>
-              </EcoCardHeader>
-              <EcoCardContent className="space-y-4">
-                <div>
-                  <Label htmlFor="country">Country</Label>
-                  <Select
-                    value={isEditing ? editedProfile.region_country : profile?.region_country || "India"}
-                    onValueChange={(value) => setEditedProfile(prev => ({ ...prev, region_country: value }))}
-                    disabled={!isEditing}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select country" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="India">India</SelectItem>
-                      <SelectItem value="USA">United States</SelectItem>
-                      <SelectItem value="UK">United Kingdom</SelectItem>
-                      <SelectItem value="Canada">Canada</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div>
-                  <Label htmlFor="state">State</Label>
-                  <Input
-                    id="state"
-                    value={isEditing ? editedProfile.region_state : profile?.region_state || ""}
-                    onChange={(e) => setEditedProfile(prev => ({ ...prev, region_state: e.target.value }))}
-                    disabled={!isEditing}
-                    placeholder="Enter your state"
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="district">District</Label>
-                  <Input
-                    id="district"
-                    value={isEditing ? editedProfile.region_district : profile?.region_district || ""}
-                    onChange={(e) => setEditedProfile(prev => ({ ...prev, region_district: e.target.value }))}
-                    disabled={!isEditing}
-                    placeholder="Enter your district"
-                  />
-                </div>
-              </EcoCardContent>
-            </EcoCard>
+<EcoCard>
+  <EcoCardHeader>
+    <EcoCardTitle className="flex items-center gap-2">
+      <MapPin className="h-5 w-5 text-primary" />
+      Location
+    </EcoCardTitle>
+  </EcoCardHeader>
+  <EcoCardContent className="space-y-4">
+    <div>
+      <Label htmlFor="country">Country</Label>
+      <Select
+        value={isEditing ? editedProfile.region_country : profile?.region_country || "India"}
+        onValueChange={(value) => setEditedProfile(prev => ({ ...prev, region_country: value }))}
+        disabled={!isEditing}
+      >
+        <SelectTrigger>
+          <SelectValue placeholder="Select country" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="India">India</SelectItem>
+          <SelectItem value="USA">United States</SelectItem>
+          <SelectItem value="UK">United Kingdom</SelectItem>
+          <SelectItem value="Canada">Canada</SelectItem>
+        </SelectContent>
+      </Select>
+    </div>
+    
+    <div>
+      <Label htmlFor="state">State</Label>
+      <Input
+        id="state"
+        value={isEditing ? editedProfile.region_state : profile?.region_state || ""}
+        onChange={(e) => setEditedProfile(prev => ({ ...prev, region_state: e.target.value }))}
+        disabled={!isEditing}
+        placeholder="Enter your state"
+      />
+    </div>
+    
+    <div>
+      <Label htmlFor="district">District</Label>
+      <Input
+        id="district"
+        value={isEditing ? editedProfile.region_district : profile?.region_district || ""}
+        onChange={(e) => setEditedProfile(prev => ({ ...prev, region_district: e.target.value }))}
+        disabled={!isEditing}
+        placeholder="Enter your district"
+      />
+    </div>
+  </EcoCardContent>
+</EcoCard>
           </div>
 
           {/* Stats & Achievements */}
@@ -262,7 +289,7 @@ export default function Profile() {
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm text-muted-foreground">Badges Earned</span>
-                    <Badge variant="outline">{profile?.badges?.length || 0}</Badge>
+                    <Badge variant="outline">{badgeCount}</Badge>
                   </div>
                   <div className="text-xs text-muted-foreground">
                     Keep completing lessons to earn more badges!

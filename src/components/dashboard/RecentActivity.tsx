@@ -4,6 +4,7 @@ import { EcoCard, EcoCardContent, EcoCardHeader, EcoCardTitle } from "@/componen
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Activity, CheckCircle, Upload, UserPlus, BookOpen } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
+import { useAuth } from "@/contexts/AuthContext"
 
 interface Activity {
   id: string
@@ -20,15 +21,29 @@ interface RecentActivityProps {
 }
 
 export function RecentActivity({ organizationName }: RecentActivityProps) {
+  const { user } = useAuth()
   const { data: activities = [], isLoading } = useQuery<Activity[]>({
-    queryKey: ['recent-activity', organizationName],
+    queryKey: ['recent-activity', user?.id],
     queryFn: async () => {
-      // Since activity_log table uses organization_code, we need to skip this for now
-      // Organizations are identified by organization_name in profiles
-      // This would require a database migration to add organization_code column or change activity_log structure
-      return []
+      if (!user) return []
+      // Get current organization's code for the authenticated user
+      const { data: orgProfile, error: pErr } = await (supabase.from as any)('profiles')
+        .select('organization_code')
+        .eq('user_id', user.id)
+        .maybeSingle()
+      if (pErr) throw pErr
+      const orgCode = (orgProfile as any)?.organization_code
+      if (!orgCode) return []
+      // Fetch recent activities for this organization (RLS restricts access)
+      const { data, error } = await supabase
+        .from('activity_log')
+        .select('*')
+        .eq('organization_code', orgCode)
+        .order('created_at', { ascending: false })
+      if (error) throw error
+      return (data || []) as Activity[]
     },
-    enabled: !!organizationName,
+    enabled: !!user,
   })
 
   const getActivityIcon = (type: string) => {

@@ -9,7 +9,7 @@ import { useAuth } from "@/contexts/AuthContext"
 
 interface LeaderboardEntry {
   user_id: string
-  display_name: string
+  display_name: string | null
   eco_points: number
   completed_missions: number
   rank: number
@@ -27,56 +27,27 @@ export function Leaderboard() {
     queryFn: async () => {
       if (!user) return []
 
-      // Get current user's region info
-      const { data: userProfile } = await supabase
-        .from('profiles')
-        .select('region_district, region_state, region_country, organization_name')
-        .eq('user_id', user.id)
-        .single()
-
-      if (!userProfile) return []
-
-      // Query to show all students from selected region
-      let query = supabase
-        .from('profiles')
-        .select('user_id, display_name, eco_points, completed_missions, region_district, region_state, region_country')
-        .eq('role', 'student')
-
-      // Filter by region
-      switch (selectedRegion) {
-        case 'organization':
-          if (userProfile.organization_name) {
-            query = query.eq('organization_name', userProfile.organization_name)
-          }
-          break
-        case 'district':
-          if (userProfile.region_district) {
-            query = query.eq('region_district', userProfile.region_district)
-          }
-          break
-        case 'state':
-          if (userProfile.region_state) {
-            query = query.eq('region_state', userProfile.region_state)
-          }
-          break
-        case 'country':
-          if (userProfile.region_country) {
-            query = query.eq('region_country', userProfile.region_country)
-          }
-          break
-      }
-
-      const { data, error } = await query
-        .order('eco_points', { ascending: false })
-        .order('updated_at', { ascending: true })
+      // Use secure RPC to respect RLS and fetch leaderboard scoped to current user
+      const { data, error } = await (supabase.rpc as any)('get_student_leaderboard_by_scope', {
+        scope: selectedRegion,
+      })
 
       if (error) throw error
 
       // Add ranks
-      return data.map((entry, index) => ({
-        ...entry,
-        rank: index + 1
+      const ranked = (data || []).map((entry: any, index: number) => ({
+        user_id: entry.user_id,
+        display_name: entry.display_name,
+        eco_points: entry.eco_points,
+        completed_missions: entry.completed_missions,
+        rank: index + 1,
+        region_district: entry.region_district,
+        region_state: entry.region_state,
+        region_country: entry.region_country,
+        organization_name: entry.organization_name,
       })) as LeaderboardEntry[]
+
+      return ranked
     },
     enabled: !!user,
   })
