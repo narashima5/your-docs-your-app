@@ -61,31 +61,66 @@ export default function Missions() {
     return matchesSearch && matchesCategory && matchesDifficulty
   }) || []
 
-  const handleSubmissionSubmit = (missionId: string) => {
+  const handleSubmissionSubmit = async (missionId: string) => {
     if (submissionFiles.length === 0) {
       return
     }
 
-    // In real app, files would be uploaded to storage first
-    const fileUrls = submissionFiles.map(file => URL.createObjectURL(file))
-    
-    // Find the first video file for video_url
-    const videoFile = submissionFiles.find(file => file.type.startsWith('video/'))
-    const videoUrl = videoFile ? URL.createObjectURL(videoFile) : null
-    
-    submitMission({
-      missionId,
-      submissionData: {
-        files: fileUrls,
-        description: submissionDescription,
-        timestamp: new Date().toISOString()
-      },
-      videoUrl
-    })
+    try {
+      // Upload files to Supabase storage
+      const { supabase } = await import("@/integrations/supabase/client")
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (!user) {
+        throw new Error("User not authenticated")
+      }
 
-    setShowSubmissionForm(null)
-    setSubmissionFiles([])
-    setSubmissionDescription("")
+      const userId = user.id
+      const fileUrls: string[] = []
+      let videoUrl: string | null = null
+
+      // Upload each file to storage
+      for (const file of submissionFiles) {
+        const timestamp = Date.now()
+        const fileName = `${userId}/${timestamp}-${file.name}`
+        
+        const { error: uploadError } = await supabase.storage
+          .from('mission-videos')
+          .upload(fileName, file)
+
+        if (uploadError) {
+          throw uploadError
+        }
+
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('mission-videos')
+          .getPublicUrl(fileName)
+
+        fileUrls.push(publicUrl)
+
+        // If this is a video file, set it as the video URL
+        if (file.type.startsWith('video/') && !videoUrl) {
+          videoUrl = publicUrl
+        }
+      }
+      
+      submitMission({
+        missionId,
+        submissionData: {
+          files: fileUrls,
+          description: submissionDescription,
+          timestamp: new Date().toISOString()
+        },
+        videoUrl
+      })
+
+      setShowSubmissionForm(null)
+      setSubmissionFiles([])
+      setSubmissionDescription("")
+    } catch (error) {
+      console.error("Error uploading files:", error)
+    }
   }
 
   const getActionButton = (mission: any) => {
