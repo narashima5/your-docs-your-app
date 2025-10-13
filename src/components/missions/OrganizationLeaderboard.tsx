@@ -43,7 +43,7 @@ export function OrganizationLeaderboard({ className }: { className?: string }) {
     },
   })
 
-  // Get organization leaderboard data
+  // Get organization leaderboard data by aggregating from profiles
   const { data: organizations = [], isLoading } = useQuery({
     queryKey: ['organization-leaderboard', selectedRegion, selectedValue],
     queryFn: async () => {
@@ -52,15 +52,58 @@ export function OrganizationLeaderboard({ className }: { className?: string }) {
       const column = selectedRegion === 'district' ? 'region_district' : 
                    selectedRegion === 'state' ? 'region_state' : 'region_country'
       
-      const { data, error } = await supabase
-        .from('organization_leaderboard')
-        .select('*')
+      // Fetch all student profiles in the selected region with organization names
+      const { data: students, error } = await supabase
+        .from('profiles')
+        .select('organization_name, organization_code, region_district, region_state, region_country, eco_points, completed_lessons, completed_missions')
+        .eq('role', 'student')
         .eq(column, selectedValue)
-        .order('student_count', { ascending: false })
-        .order('total_eco_points', { ascending: false })
+        .not('organization_name', 'is', null)
       
       if (error) throw error
-      return data as OrganizationLeaderboardData[]
+      if (!students) return []
+      
+      // Aggregate data by organization
+      const orgMap = new Map<string, OrganizationLeaderboardData>()
+      
+      students.forEach(student => {
+        const orgKey = student.organization_code || student.organization_name
+        if (!orgKey || !student.organization_name) return
+        
+        if (!orgMap.has(orgKey)) {
+          orgMap.set(orgKey, {
+            organization_name: student.organization_name,
+            region_district: student.region_district || '',
+            region_state: student.region_state || '',
+            region_country: student.region_country || 'India',
+            student_count: 0,
+            total_eco_points: 0,
+            avg_eco_points: 0,
+            total_lessons_completed: 0,
+            total_missions_completed: 0
+          })
+        }
+        
+        const org = orgMap.get(orgKey)!
+        org.student_count++
+        org.total_eco_points += student.eco_points || 0
+        org.total_lessons_completed += student.completed_lessons || 0
+        org.total_missions_completed += student.completed_missions || 0
+      })
+      
+      // Calculate averages and convert to array
+      const organizations = Array.from(orgMap.values()).map(org => ({
+        ...org,
+        avg_eco_points: org.student_count > 0 ? org.total_eco_points / org.student_count : 0
+      }))
+      
+      // Sort by student count first, then by total points
+      return organizations.sort((a, b) => {
+        if (b.student_count !== a.student_count) {
+          return b.student_count - a.student_count
+        }
+        return b.total_eco_points - a.total_eco_points
+      })
     },
     enabled: !!selectedValue,
   })

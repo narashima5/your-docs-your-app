@@ -476,20 +476,7 @@ export type Database = {
       }
     }
     Views: {
-      organization_leaderboard: {
-        Row: {
-          avg_eco_points: number | null
-          organization_name: string | null
-          region_country: string | null
-          region_district: string | null
-          region_state: string | null
-          student_count: number | null
-          total_eco_points: number | null
-          total_lessons_completed: number | null
-          total_missions_completed: number | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       generate_organization_code: {
