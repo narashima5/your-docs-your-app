@@ -6,6 +6,33 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { useProfile } from "@/hooks/useProfile"
 import { toast } from "sonner"
+import { z } from "zod"
+
+const organizationSettingsSchema = z.object({
+  organizationName: z.string()
+    .trim()
+    .min(2, 'Organization name must be at least 2 characters')
+    .max(100, 'Organization name must be less than 100 characters')
+    .regex(/^[a-zA-Z0-9\s\-_.]+$/, 'Only letters, numbers, spaces, hyphens, underscores, and periods allowed'),
+  displayName: z.string()
+    .trim()
+    .min(2, 'Display name must be at least 2 characters')
+    .max(50, 'Display name must be less than 50 characters'),
+  regionDistrict: z.string()
+    .trim()
+    .max(100, 'District name too long')
+    .optional()
+    .or(z.literal('')),
+  regionState: z.string()
+    .trim()
+    .max(100, 'State name too long')
+    .optional()
+    .or(z.literal('')),
+  regionCountry: z.string()
+    .trim()
+    .min(2, 'Country name required')
+    .max(100, 'Country name too long')
+})
 
 interface OrganizationSettingsProps {
   isOpen: boolean
@@ -25,16 +52,25 @@ export function OrganizationSettings({ isOpen, onClose }: OrganizationSettingsPr
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    updateProfile({
-      organization_name: formData.organizationName,
-      display_name: formData.displayName,
-      region_district: formData.regionDistrict,
-      region_state: formData.regionState,
-      region_country: formData.regionCountry
-    })
+    try {
+      const validated = organizationSettingsSchema.parse(formData)
+      updateProfile({
+        organization_name: validated.organizationName,
+        display_name: validated.displayName,
+        region_district: validated.regionDistrict || null,
+        region_state: validated.regionState || null,
+        region_country: validated.regionCountry
+      })
 
-    toast.success("Organization settings updated successfully!")
-    onClose()
+      toast.success("Organization settings updated successfully!")
+      onClose()
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast.error(error.errors[0].message)
+        return
+      }
+      toast.error('Failed to update settings')
+    }
   }
 
   return (
