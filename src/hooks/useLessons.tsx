@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/contexts/AuthContext'
-import { useToast } from '@/hooks/use-toast'
+import { useRewards } from '@/contexts/RewardsContext'
 
 interface Lesson {
   id: string
@@ -38,7 +38,7 @@ interface LessonWithProgress extends Lesson {
 export function useLessons() {
   const { user } = useAuth()
   const queryClient = useQueryClient()
-  const { toast } = useToast()
+  const { addReward } = useRewards()
 
   const { data: lessons, isLoading, error } = useQuery({
     queryKey: ['lessons', user?.id],
@@ -119,15 +119,48 @@ export function useLessons() {
       if (error) throw error
       return data
     },
-    onSuccess: (data) => {
+    onSuccess: async (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['lessons', user?.id] })
       queryClient.invalidateQueries({ queryKey: ['profile', user?.id] })
+      queryClient.invalidateQueries({ queryKey: ['completed-lessons', user?.id] })
       
       if (data.is_completed) {
-        toast({
-          title: "Lesson Completed! 🎉",
-          description: "You earned 25 eco-points!",
+        // Get lesson title
+        const { data: lessonData } = await supabase
+          .from('lessons')
+          .select('title')
+          .eq('id', variables.lessonId)
+          .single()
+        
+        // Show lesson completion animation
+        addReward({
+          type: 'lesson',
+          points: 25,
+          title: lessonData?.title || 'Lesson'
         })
+        
+        // Check for level up
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('level, eco_points')
+          .eq('user_id', user?.id)
+          .single()
+        
+        if (profileData) {
+          const oldLevel = Math.max(1, Math.floor((profileData.eco_points - 25) / 200) + 1)
+          const newLevel = Math.max(1, Math.floor(profileData.eco_points / 200) + 1)
+          
+          if (newLevel > oldLevel) {
+            setTimeout(() => {
+              addReward({
+                type: 'level_up',
+                points: 0,
+                title: `Level ${newLevel}`,
+                newLevel
+              })
+            }, 3500)
+          }
+        }
       }
     },
   })

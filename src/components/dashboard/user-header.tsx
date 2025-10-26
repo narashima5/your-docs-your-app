@@ -12,9 +12,9 @@ export function UserHeader() {
   const navigate = useNavigate()
 
   if (isLoading || !user || !profile) {
-    return (
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-4">
+  return (
+    <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
+      <div className="flex items-center gap-4">
           <div className="h-16 w-16 bg-muted rounded-full animate-pulse" />
           <div className="space-y-2">
             <div className="h-6 w-32 bg-muted rounded animate-pulse" />
@@ -57,7 +57,11 @@ export function UserHeader() {
       </div>
 
       <div className="flex items-center gap-2">
-        <EcoButton variant="outline" size="sm" onClick={() => navigate('/profile')}>
+        <EcoButton 
+          variant="outline" 
+          size="sm" 
+          onClick={() => navigate(profile.role === 'organization' ? '/organization-profile' : '/profile')}
+        >
           <Settings className="h-4 w-4 mr-2" />
           Settings
         </EcoButton>

@@ -102,7 +102,7 @@ export function CompletedMissionsList({ onClose }: CompletedMissionsListProps) {
           )}
         </EcoCardHeader>
 
-        <EcoCardContent className="overflow-y-auto">
+        <EcoCardContent className="overflow-y-auto max-h-[60vh]">
           {isLoading ? (
             <div className="space-y-4">
               {[...Array(5)].map((_, i) => (

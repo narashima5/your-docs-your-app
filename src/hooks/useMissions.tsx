@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/contexts/AuthContext'
-import { useToast } from '@/hooks/use-toast'
+import { useRewards } from '@/contexts/RewardsContext'
 
 interface Mission {
   id: string
@@ -40,7 +40,7 @@ interface MissionWithSubmission extends Mission {
 export function useMissions() {
   const { user } = useAuth()
   const queryClient = useQueryClient()
-  const { toast } = useToast()
+  const { addReward } = useRewards()
 
   const { data: missions, isLoading, error } = useQuery({
     queryKey: ['missions', user?.id],
@@ -106,10 +106,6 @@ export function useMissions() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['missions', user?.id] })
-      toast({
-        title: "Mission Started! 🚀",
-        description: "Good luck with your environmental action!",
-      })
     },
   })
 
@@ -137,11 +133,22 @@ export function useMissions() {
       if (error) throw error
       return data
     },
-    onSuccess: () => {
+    onSuccess: async (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['missions', user?.id] })
-      toast({
-        title: "Mission Submitted! 📸",
-        description: "Your submission is being reviewed. You'll be notified once approved!",
+      queryClient.invalidateQueries({ queryKey: ['completed-missions', user?.id] })
+      
+      // Get mission title
+      const { data: missionData } = await supabase
+        .from('missions')
+        .select('title')
+        .eq('id', variables.missionId)
+        .single()
+      
+      // Show mission submission animation
+      addReward({
+        type: 'mission',
+        points: 0, // Points awarded on approval, not submission
+        title: missionData?.title || 'Mission'
       })
     },
   })
