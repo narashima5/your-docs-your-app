@@ -479,12 +479,9 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      generate_organization_code: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      generate_organization_code: { Args: never; Returns: string }
       get_student_leaderboard: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           completed_lessons: number
           completed_missions: number
@@ -515,10 +512,7 @@ export type Database = {
           user_id: string
         }[]
       }
-      get_user_org_code: {
-        Args: { _user_id: string }
-        Returns: string
-      }
+      get_user_org_code: { Args: { _user_id: string }; Returns: string }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
