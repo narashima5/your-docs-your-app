@@ -21,19 +21,6 @@ const RewardsContext = createContext<RewardsContextType | undefined>(undefined)
 export function RewardsProvider({ children }: { children: ReactNode }) {
   const [rewards, setRewards] = useState<Reward[]>([])
 
-  // Auto-claim rewards on unmount after 10 seconds
-  useEffect(() => {
-    rewards.forEach(reward => {
-      if (!reward.claimed) {
-        const timer = setTimeout(() => {
-          claimReward(reward.id)
-        }, 10000)
-        
-        return () => clearTimeout(timer)
-      }
-    })
-  }, [rewards])
-
   const addReward = (reward: Omit<Reward, 'id' | 'claimed'>) => {
     const newReward: Reward = {
       ...reward,

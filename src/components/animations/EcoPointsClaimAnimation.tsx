@@ -175,7 +175,7 @@ export function EcoPointsClaimAnimation({
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.7 }}
               >
-                Auto-claimed in 10 seconds
+                Click the button to claim your points!
               </motion.p>
             </motion.div>
           </motion.div>

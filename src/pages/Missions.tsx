@@ -84,9 +84,6 @@ export default function Missions() {
       const fileUrls: string[] = []
       let videoUrl: string | null = null
 
-      // Calculate progress per file
-      const progressPerFile = 100 / submissionFiles.length
-
       // Upload each file to storage
       for (let i = 0; i < submissionFiles.length; i++) {
         const file = submissionFiles[i]
@@ -94,6 +91,11 @@ export default function Missions() {
         // Sanitize filename: remove special characters and spaces
         const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
         const fileName = `${userId}/${timestamp}-${sanitizedName}`
+        
+        // Update progress before upload starts
+        const progressBefore = (i / submissionFiles.length) * 100
+        const progressAfter = ((i + 1) / submissionFiles.length) * 100
+        setUploadProgress(progressBefore)
         
         const { error: uploadError } = await supabase.storage
           .from('mission-videos')
@@ -107,8 +109,8 @@ export default function Missions() {
           throw uploadError
         }
 
-        // Update progress
-        setUploadProgress((i + 1) * progressPerFile)
+        // Update progress after upload completes
+        setUploadProgress(progressAfter)
 
         // Get public URL
         const { data: { publicUrl } } = supabase.storage
