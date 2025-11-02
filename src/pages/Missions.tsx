@@ -84,35 +84,58 @@ export default function Missions() {
       const fileUrls: string[] = []
       let videoUrl: string | null = null
 
-      // Upload each file to storage
+      // Upload each file to storage with real progress using signed upload URL + XHR
+      const total = submissionFiles.length
+      const portion = 100 / total
+
       for (let i = 0; i < submissionFiles.length; i++) {
         const file = submissionFiles[i]
         const timestamp = Date.now()
         // Sanitize filename: remove special characters and spaces
         const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
         const fileName = `${userId}/${timestamp}-${sanitizedName}`
-        
-        // Update progress before upload starts
-        const progressBefore = (i / submissionFiles.length) * 100
-        const progressAfter = ((i + 1) / submissionFiles.length) * 100
-        setUploadProgress(progressBefore)
-        
-        const { error: uploadError } = await supabase.storage
-          .from('mission-videos')
-          .upload(fileName, file, {
-            contentType: file.type,
-            cacheControl: '3600',
-            upsert: false
-          })
 
-        if (uploadError) {
-          throw uploadError
+        const progressBefore = i * portion
+        const progressAfter = (i + 1) * portion
+        setUploadProgress(progressBefore)
+
+        // Create signed upload URL (works with private buckets) and upload via XHR to capture progress
+        const { data: signed, error: signedError } = await supabase.storage
+          .from('mission-videos')
+          .createSignedUploadUrl(fileName)
+        
+        if (signedError || !signed?.signedUrl) {
+          throw signedError || new Error('Failed to get signed upload URL')
         }
 
-        // Update progress after upload completes
+        await new Promise<void>((resolve, reject) => {
+          const xhr = new XMLHttpRequest()
+          xhr.open('PUT', signed.signedUrl)
+          xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream')
+          xhr.setRequestHeader('x-upsert', 'false')
+
+          xhr.upload.onprogress = (e) => {
+            if (e.lengthComputable) {
+              const filePercent = (e.loaded / e.total) * portion
+              setUploadProgress(Math.min(99, progressBefore + filePercent))
+            }
+          }
+
+          xhr.onload = () => {
+            if (xhr.status >= 200 && xhr.status < 300) {
+              resolve()
+            } else {
+              reject(new Error(`Upload failed with status ${xhr.status}`))
+            }
+          }
+          xhr.onerror = () => reject(new Error('Upload error'))
+          xhr.send(file)
+        })
+
+        // Ensure we hit the next step visually
         setUploadProgress(progressAfter)
 
-        // Get public URL
+        // Get public URL (may not be publicly accessible if bucket is private; kept for backward compat)
         const { data: { publicUrl } } = supabase.storage
           .from('mission-videos')
           .getPublicUrl(fileName)
