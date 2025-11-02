@@ -9,6 +9,7 @@ import { StatsCard } from "@/components/ui/stats-card"
 import { StudentsModal } from "./StudentsModal"
 import { RecentActivity } from "./RecentActivity"
 import { OrganizationSettings } from "./OrganizationSettings"
+import { useNavigate } from "react-router-dom"
 
 interface Student {
   id: string
@@ -27,6 +28,7 @@ export function OrganizationDashboard() {
   const { user, signOut } = useAuth()
   const [showStudentsModal, setShowStudentsModal] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
+  const navigate = useNavigate()
 
   const { data: organizationProfile } = useQuery({
     queryKey: ['organization-profile', user?.id],
@@ -129,7 +131,7 @@ export function OrganizationDashboard() {
           </div>
 
           <div className="flex items-center gap-2">
-            <EcoButton variant="outline" size="sm" onClick={() => setShowSettings(true)}>
+<EcoButton variant="outline" size="sm" onClick={() => navigate('/organization-profile')}>
               <Settings className="h-4 w-4 mr-2" />
               Settings
             </EcoButton>

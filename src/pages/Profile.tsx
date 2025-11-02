@@ -36,24 +36,29 @@ export default function Profile() {
 const { toast } = useToast()
 const { badgeCount } = useUserBadges()
 
-// Get user's position in leaderboard
+// Get user's position in scoped leaderboard (organization -> district -> state -> country -> global)
 const { data: userRank } = useQuery({
-  queryKey: ['user-rank', user?.id],
+  queryKey: ['user-rank', user?.id, profile?.organization_code, profile?.region_district, profile?.region_state, profile?.region_country],
   queryFn: async () => {
     if (!user) return null
+    // Decide scope based on user's context
+    const scope = profile?.organization_code
+      ? 'organization'
+      : profile?.region_district
+      ? 'district'
+      : profile?.region_state
+      ? 'state'
+      : profile?.region_country
+      ? 'country'
+      : ''
 
-    // Use RPC to compute rank securely if available; fallback to client-side order
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('user_id, eco_points')
-      .order('eco_points', { ascending: false })
-
+    const { data, error } = await supabase.rpc('get_student_leaderboard_by_scope', { scope })
     if (error) throw error
 
     const userIndex = data.findIndex(entry => entry.user_id === user.id)
     return userIndex !== -1 ? userIndex + 1 : null
   },
-  enabled: !!user,
+  enabled: !!user && !!profile,
 })
 
   // Initialize edit form when profile loads
