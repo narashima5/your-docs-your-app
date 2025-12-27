@@ -105,26 +105,26 @@ export default function OrganizationProfile() {
     <div className="min-h-screen bg-gradient-to-br from-background via-primary/2 to-accent/5">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
           <div className="flex items-center gap-3">
-            <EcoButton variant="outline" onClick={() => navigate('/dashboard')}>
+            <EcoButton variant="outline" size="sm" onClick={() => navigate('/dashboard')}>
               <X className="h-4 w-4" />
-              Back
+              <span className="hidden sm:inline ml-2">Back</span>
             </EcoButton>
-            <h1 className="text-3xl font-bold text-foreground">Organization Profile</h1>
+            <h1 className="text-xl sm:text-3xl font-bold text-foreground">Organization Profile</h1>
           </div>
           {!isEditing ? (
-            <EcoButton onClick={handleEdit}>
+            <EcoButton onClick={handleEdit} className="w-full sm:w-auto">
               <Edit3 className="h-4 w-4 mr-2" />
               Edit Profile
             </EcoButton>
           ) : (
-            <div className="flex gap-2">
-              <EcoButton onClick={handleSave} disabled={isUpdating}>
+            <div className="flex gap-2 w-full sm:w-auto">
+              <EcoButton onClick={handleSave} disabled={isUpdating} className="flex-1 sm:flex-none">
                 <Save className="h-4 w-4 mr-2" />
                 Save
               </EcoButton>
-              <EcoButton variant="outline" onClick={handleCancel}>
+              <EcoButton variant="outline" onClick={handleCancel} className="flex-1 sm:flex-none">
                 Cancel
               </EcoButton>
             </div>

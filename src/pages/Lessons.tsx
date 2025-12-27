@@ -120,17 +120,17 @@ export default function Lessons() {
     <div className="min-h-screen bg-gradient-to-br from-background via-primary/2 to-accent/5">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
             <Link to="/dashboard">
               <EcoButton variant="outline" size="sm">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Dashboard
+                <ArrowLeft className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Dashboard</span>
               </EcoButton>
             </Link>
             <div>
-              <h1 className="text-3xl font-bold text-foreground">Environmental Lessons</h1>
-              <p className="text-muted-foreground mt-1">Expand your knowledge with interactive learning</p>
+              <h1 className="text-xl sm:text-3xl font-bold text-foreground">Environmental Lessons</h1>
+              <p className="text-sm sm:text-base text-muted-foreground mt-1">Expand your knowledge with interactive learning</p>
             </div>
           </div>
         </div>

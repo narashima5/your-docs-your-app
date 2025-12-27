@@ -43,37 +43,37 @@ export function LeaderboardEntry({ entry, isCurrentUser }: LeaderboardEntryProps
 
   return (
     <div
-      className={`p-4 rounded-lg border ${getRankColor(entry.rank)} ${
+      className={`p-3 sm:p-4 rounded-lg border ${getRankColor(entry.rank)} ${
         isCurrentUser ? "ring-2 ring-primary" : ""
       }`}
     >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 min-w-[60px]">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+          <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
             {getRankIcon(entry.rank)}
-            <span className="font-bold">#{entry.rank}</span>
+            <span className="font-bold text-sm sm:text-base">#{entry.rank}</span>
           </div>
           
-          <div className="flex-1">
-            <div className="flex items-center gap-2">
-              <p className="font-medium">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+              <p className="font-medium text-sm sm:text-base truncate">
                 {entry.display_name || 'Anonymous User'}
               </p>
               {isCurrentUser && (
-                <Badge variant="outline" className="text-xs">You</Badge>
+                <Badge variant="outline" className="text-xs flex-shrink-0">You</Badge>
               )}
             </div>
-            <p className="text-sm text-muted-foreground">
-              {entry.completed_missions} missions completed
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              {entry.completed_missions} missions
             </p>
           </div>
         </div>
 
-        <div className="text-right">
-          <div className="font-bold text-primary text-lg">
+        <div className="text-right flex-shrink-0">
+          <div className="font-bold text-primary text-sm sm:text-lg">
             {entry.eco_points}
           </div>
-          <div className="text-xs text-muted-foreground">
+          <div className="text-xs text-muted-foreground hidden sm:block">
             eco-points
           </div>
         </div>

@@ -9,14 +9,14 @@ interface LeaderboardHeaderProps {
 
 export function LeaderboardHeader({ selectedRegion, onRegionChange }: LeaderboardHeaderProps) {
   return (
-    <div className="flex items-center justify-between">
-      <EcoCardTitle className="flex items-center gap-2">
-        <Trophy className="h-5 w-5 text-primary" />
+    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+      <EcoCardTitle className="flex items-center gap-2 text-base sm:text-lg">
+        <Trophy className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
         Regional Leaderboard
       </EcoCardTitle>
       
       <Select value={selectedRegion} onValueChange={(value: "district" | "state" | "country" | "organization") => onRegionChange(value)}>
-        <SelectTrigger className="w-40">
+        <SelectTrigger className="w-full sm:w-40">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>

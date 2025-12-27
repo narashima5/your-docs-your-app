@@ -111,9 +111,9 @@ export function VideoPlayer({ lesson, onProgressUpdate, onComplete, onClose }: V
   return (
     <div className="fixed inset-0 bg-background z-50 flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-border">
-        <h1 className="text-xl font-bold text-foreground">{lesson.title}</h1>
-        <EcoButton variant="outline" size="sm" onClick={onClose}>
+      <div className="flex items-center justify-between p-2 sm:p-4 border-b border-border">
+        <h1 className="text-sm sm:text-xl font-bold text-foreground truncate pr-2">{lesson.title}</h1>
+        <EcoButton variant="outline" size="sm" onClick={onClose} className="flex-shrink-0">
           <X className="h-4 w-4" />
         </EcoButton>
       </div>
@@ -168,52 +168,52 @@ export function VideoPlayer({ lesson, onProgressUpdate, onComplete, onClose }: V
               
               {/* Controls */}
               <div className="flex items-center justify-between text-white">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 sm:gap-2">
                   <EcoButton
                     variant="ghost"
                     size="sm"
                     onClick={skipBackward}
-                    className="text-white hover:bg-white/20"
+                    className="text-white hover:bg-white/20 p-1 sm:p-2"
                     title="Skip backward 10s"
                   >
-                    <SkipBack className="h-5 w-5" />
+                    <SkipBack className="h-4 w-4 sm:h-5 sm:w-5" />
                   </EcoButton>
                   
                   <EcoButton
                     variant="ghost"
                     size="sm"
                     onClick={togglePlay}
-                    className="text-white hover:bg-white/20"
+                    className="text-white hover:bg-white/20 p-1 sm:p-2"
                   >
-                    {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+                    {isPlaying ? <Pause className="h-4 w-4 sm:h-5 sm:w-5" /> : <Play className="h-4 w-4 sm:h-5 sm:w-5" />}
                   </EcoButton>
                   
                   <EcoButton
                     variant="ghost"
                     size="sm"
                     onClick={skipForward}
-                    className="text-white hover:bg-white/20"
+                    className="text-white hover:bg-white/20 p-1 sm:p-2"
                     title="Skip forward 10s"
                   >
-                    <SkipForward className="h-5 w-5" />
+                    <SkipForward className="h-4 w-4 sm:h-5 sm:w-5" />
                   </EcoButton>
                   
                   <EcoButton
                     variant="ghost"
                     size="sm"
                     onClick={toggleMute}
-                    className="text-white hover:bg-white/20"
+                    className="text-white hover:bg-white/20 p-1 sm:p-2 hidden sm:inline-flex"
                   >
-                    {isMuted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
+                    {isMuted ? <VolumeX className="h-4 w-4 sm:h-5 sm:w-5" /> : <Volume2 className="h-4 w-4 sm:h-5 sm:w-5" />}
                   </EcoButton>
                   
-                  <span className="text-sm">
+                  <span className="text-xs sm:text-sm ml-1 sm:ml-2">
                     {formatTime(currentTime)} / {formatTime(duration)}
                   </span>
                 </div>
                 
-                <div className="text-sm">
-                  Progress: {Math.round(progress)}%
+                <div className="text-xs sm:text-sm">
+                  {Math.round(progress)}%
                 </div>
               </div>
             </div>

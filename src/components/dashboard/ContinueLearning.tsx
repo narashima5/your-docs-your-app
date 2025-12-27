@@ -84,18 +84,18 @@ export function ContinueLearning() {
               {inProgressLessons.map((progress: any) => (
                 <div
                   key={progress.id}
-                  className="flex items-center justify-between p-4 bg-muted/30 rounded-lg hover:bg-muted/50 transition-colors"
+                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 sm:p-4 bg-muted/30 rounded-lg hover:bg-muted/50 transition-colors"
                 >
-                  <div className="flex-1">
-                    <h4 className="font-medium">{progress.lesson.title}</h4>
-                    <div className="flex items-center gap-4 mt-2">
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-medium text-sm sm:text-base truncate">{progress.lesson.title}</h4>
+                    <div className="flex items-center gap-2 sm:gap-4 mt-2">
                       <div className="flex-1 bg-muted rounded-full h-2">
                         <div
                           className="bg-primary h-2 rounded-full transition-all"
                           style={{ width: `${progress.progress_percentage}%` }}
                         />
                       </div>
-                      <span className="text-sm text-muted-foreground">
+                      <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
                         {progress.progress_percentage}%
                       </span>
                     </div>
@@ -103,7 +103,7 @@ export function ContinueLearning() {
                   <EcoButton
                     variant="eco"
                     size="sm"
-                    className="ml-4"
+                    className="w-full sm:w-auto sm:ml-4"
                     onClick={() => setSelectedLesson(progress.lesson)}
                   >
                     <PlayCircle className="h-4 w-4 mr-2" />
@@ -124,17 +124,18 @@ export function ContinueLearning() {
               {startedMissions.map((submission: any) => (
                 <div
                   key={submission.id}
-                  className="flex items-center justify-between p-4 bg-muted/30 rounded-lg hover:bg-muted/50 transition-colors"
+                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 sm:p-4 bg-muted/30 rounded-lg hover:bg-muted/50 transition-colors"
                 >
-                  <div>
-                    <h4 className="font-medium">{submission.mission.title}</h4>
-                    <p className="text-sm text-muted-foreground mt-1">
+                  <div className="min-w-0">
+                    <h4 className="font-medium text-sm sm:text-base truncate">{submission.mission.title}</h4>
+                    <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                       Started on {new Date(submission.created_at).toLocaleDateString()}
                     </p>
                   </div>
                   <EcoButton
                     variant="nature"
                     size="sm"
+                    className="w-full sm:w-auto"
                     onClick={() => navigate('/missions')}
                   >
                     <Camera className="h-4 w-4 mr-2" />
