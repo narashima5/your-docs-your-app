@@ -106,43 +106,44 @@ export function OrganizationDashboard() {
     <div className="min-h-screen bg-gradient-to-br from-background via-primary/2 to-accent/5">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center ring-2 ring-primary/20">
-              <Users className="h-8 w-8 text-primary" />
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="h-12 w-12 sm:h-16 sm:w-16 rounded-full bg-primary/10 flex items-center justify-center ring-2 ring-primary/20">
+              <Users className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
             </div>
             
             <div>
-              <div className="flex items-center gap-2 mb-1">
-                <h2 className="text-2xl font-bold text-foreground">
+              <div className="flex flex-wrap items-center gap-2 mb-1">
+                <h2 className="text-xl sm:text-2xl font-bold text-foreground">
                   {organizationProfile.organization_name}
                 </h2>
-                <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
+                <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 text-xs">
                   Level {organizationProfile.level}
                 </Badge>
               </div>
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
                 <div className="flex items-center gap-1">
-                  <Trophy className="h-4 w-4 text-accent" />
+                  <Trophy className="h-3 w-3 sm:h-4 sm:w-4 text-accent" />
                   <span>{organizationProfile.eco_points.toLocaleString()} Eco Points</span>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-<EcoButton variant="outline" size="sm" onClick={() => navigate('/organization-profile')}>
-              <Settings className="h-4 w-4 mr-2" />
-              Settings
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <EcoButton variant="outline" size="sm" onClick={() => navigate('/organization-profile')} className="flex-1 sm:flex-none">
+              <Settings className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Settings</span>
             </EcoButton>
-            <EcoButton variant="outline" size="sm" onClick={() => signOut()}>
-              Logout
+            <EcoButton variant="outline" size="sm" onClick={() => signOut()} className="flex-1 sm:flex-none">
+              <span className="hidden sm:inline">Logout</span>
+              <span className="sm:hidden">Exit</span>
             </EcoButton>
           </div>
         </div>
 
         {/* Organization Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-6 mb-8">
           <div onClick={() => setShowStudentsModal(true)} className="cursor-pointer">
             <StatsCard
               title="Total Students"

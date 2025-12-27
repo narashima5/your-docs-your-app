@@ -32,28 +32,28 @@ export function LessonStartModal({ lesson, isOpen, onClose, onStartVideo, onStar
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <BookOpen className="h-5 w-5" />
-            {lesson.title}
+          <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <BookOpen className="h-4 w-4 sm:h-5 sm:w-5" />
+            <span className="truncate">{lesson.title}</span>
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Lesson Info */}
-          <div className="space-y-4">
-            <p className="text-muted-foreground">{lesson.description}</p>
+          <div className="space-y-3 sm:space-y-4">
+            <p className="text-sm sm:text-base text-muted-foreground">{lesson.description}</p>
             
-            <div className="flex flex-wrap gap-2">
-              <Badge variant="outline" className={getDifficultyColor(lesson.difficulty)}>
+            <div className="flex flex-wrap gap-1.5 sm:gap-2">
+              <Badge variant="outline" className={`text-xs ${getDifficultyColor(lesson.difficulty)}`}>
                 {lesson.difficulty}
               </Badge>
-              <Badge variant="outline" className="flex items-center gap-1">
+              <Badge variant="outline" className="flex items-center gap-1 text-xs">
                 <Clock className="h-3 w-3" />
                 {lesson.duration_minutes} min
               </Badge>
-              <Badge variant="outline">
+              <Badge variant="outline" className="text-xs">
                 {lesson.category}
               </Badge>
             </div>

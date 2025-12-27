@@ -32,64 +32,64 @@ export function MissionDetailsModal({ mission, onClose, onStart }: MissionDetail
   }
 
   return (
-    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <EcoCard className="w-full max-w-2xl max-h-[90vh] overflow-hidden">
-        <EcoCardHeader>
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <EcoCardTitle className="text-xl mb-2">{mission.title}</EcoCardTitle>
-              <div className="flex items-center gap-2 mb-2">
-                <Badge className={getDifficultyColor(mission.difficulty)}>
+    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-4">
+      <EcoCard className="w-full max-w-2xl max-h-[95vh] sm:max-h-[90vh] overflow-hidden">
+        <EcoCardHeader className="p-4 sm:p-6">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex-1 min-w-0">
+              <EcoCardTitle className="text-lg sm:text-xl mb-2 truncate">{mission.title}</EcoCardTitle>
+              <div className="flex flex-wrap items-center gap-1 sm:gap-2">
+                <Badge className={`text-xs ${getDifficultyColor(mission.difficulty)}`}>
                   {mission.difficulty}
                 </Badge>
-                <Badge variant="outline">{mission.category}</Badge>
+                <Badge variant="outline" className="text-xs">{mission.category}</Badge>
               </div>
             </div>
-            <EcoButton variant="outline" size="sm" onClick={onClose}>
+            <EcoButton variant="outline" size="sm" onClick={onClose} className="flex-shrink-0">
               <X className="h-4 w-4" />
             </EcoButton>
           </div>
         </EcoCardHeader>
 
-        <EcoCardContent className="overflow-y-auto space-y-6">
+        <EcoCardContent className="overflow-y-auto space-y-4 sm:space-y-6 p-4 sm:p-6 pt-0 sm:pt-0">
           {/* Mission Overview */}
           <div>
-            <h3 className="font-semibold text-lg mb-2">Mission Overview</h3>
-            <p className="text-muted-foreground">{mission.description}</p>
+            <h3 className="font-semibold text-base sm:text-lg mb-2">Mission Overview</h3>
+            <p className="text-sm sm:text-base text-muted-foreground">{mission.description}</p>
           </div>
 
           {/* Mission Details */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="flex items-center gap-2 p-3 bg-primary/5 rounded-lg">
-              <Clock className="h-5 w-5 text-primary" />
+          <div className="grid grid-cols-3 gap-2 sm:gap-4">
+            <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 p-2 sm:p-3 bg-primary/5 rounded-lg text-center sm:text-left">
+              <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
               <div>
-                <div className="text-sm text-muted-foreground">Estimated Time</div>
-                <div className="font-medium">{mission.estimated_time}</div>
+                <div className="text-xs text-muted-foreground hidden sm:block">Estimated Time</div>
+                <div className="text-xs sm:text-sm font-medium">{mission.estimated_time}</div>
               </div>
             </div>
             
-            <div className="flex items-center gap-2 p-3 bg-accent/5 rounded-lg">
-              <Star className="h-5 w-5 text-accent" />
+            <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 p-2 sm:p-3 bg-accent/5 rounded-lg text-center sm:text-left">
+              <Star className="h-4 w-4 sm:h-5 sm:w-5 text-accent" />
               <div>
-                <div className="text-sm text-muted-foreground">Points</div>
-                <div className="font-medium">{mission.points} pts</div>
+                <div className="text-xs text-muted-foreground hidden sm:block">Points</div>
+                <div className="text-xs sm:text-sm font-medium">{mission.points} pts</div>
               </div>
             </div>
             
-            <div className="flex items-center gap-2 p-3 bg-green-500/5 rounded-lg">
-              <Target className="h-5 w-5 text-green-600" />
+            <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 p-2 sm:p-3 bg-green-500/5 rounded-lg text-center sm:text-left">
+              <Target className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
               <div>
-                <div className="text-sm text-muted-foreground">Difficulty</div>
-                <div className="font-medium">{mission.difficulty}</div>
+                <div className="text-xs text-muted-foreground hidden sm:block">Difficulty</div>
+                <div className="text-xs sm:text-sm font-medium">{mission.difficulty}</div>
               </div>
             </div>
           </div>
 
           {/* Complete Instructions */}
           <div>
-            <h3 className="font-semibold text-lg mb-3">Complete Instructions</h3>
-            <div className="bg-muted/30 p-4 rounded-lg">
-              <p className="text-sm leading-relaxed whitespace-pre-line">
+            <h3 className="font-semibold text-base sm:text-lg mb-2 sm:mb-3">Complete Instructions</h3>
+            <div className="bg-muted/30 p-3 sm:p-4 rounded-lg">
+              <p className="text-xs sm:text-sm leading-relaxed whitespace-pre-line">
                 {mission.instructions}
               </p>
             </div>
@@ -111,15 +111,15 @@ export function MissionDetailsModal({ mission, onClose, onStart }: MissionDetail
           )}
 
           {/* Action Buttons */}
-          <div className="flex gap-3 pt-4 border-t">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-3 sm:pt-4 border-t">
             <EcoButton 
               onClick={() => onStart(mission.id)}
-              className="flex-1"
+              className="w-full sm:flex-1"
             >
               <Play className="h-4 w-4 mr-2" />
               Start Mission
             </EcoButton>
-            <EcoButton variant="outline" onClick={onClose}>
+            <EcoButton variant="outline" onClick={onClose} className="w-full sm:w-auto">
               Maybe Later
             </EcoButton>
           </div>

@@ -25,49 +25,50 @@ export function UserHeader() {
     )
   }
   return (
-    <div className="flex items-center justify-between mb-8">
-      <div className="flex items-center gap-4">
-        <Avatar className="h-16 w-16 ring-2 ring-primary/20">
+    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+      <div className="flex items-center gap-3 sm:gap-4">
+        <Avatar className="h-12 w-12 sm:h-16 sm:w-16 ring-2 ring-primary/20">
           <AvatarImage src={profile.avatar_url || undefined} />
-          <AvatarFallback className="bg-primary/10 text-primary font-semibold text-xl">
+          <AvatarFallback className="bg-primary/10 text-primary font-semibold text-lg sm:text-xl">
             {profile.display_name?.split(' ').map(n => n[0]).join('') || user.email?.[0].toUpperCase() || 'U'}
           </AvatarFallback>
         </Avatar>
         
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <h2 className="text-2xl font-bold text-foreground">
+          <div className="flex flex-wrap items-center gap-2 mb-1">
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground">
               {profile.display_name || user.email?.split('@')[0] || 'Eco Learner'}
             </h2>
-            <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
+            <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 text-xs">
               Level {profile.level}
             </Badge>
           </div>
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
             <div className="flex items-center gap-1">
-              <Trophy className="h-4 w-4 text-accent" />
+              <Trophy className="h-3 w-3 sm:h-4 sm:w-4 text-accent" />
               <span>{profile.eco_points.toLocaleString()} Eco Points</span>
             </div>
             <div className="flex items-center gap-1">
-              <Flame className="h-4 w-4 text-orange-500" />
+              <Flame className="h-3 w-3 sm:h-4 sm:w-4 text-orange-500" />
               <span>{profile.streak_days} day streak</span>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 w-full sm:w-auto">
         <EcoButton 
           variant="outline" 
           size="sm" 
           onClick={() => navigate(profile.role === 'organization' ? '/organization-profile' : '/profile')}
+          className="flex-1 sm:flex-none"
         >
-          <Settings className="h-4 w-4 mr-2" />
-          Settings
+          <Settings className="h-4 w-4 sm:mr-2" />
+          <span className="hidden sm:inline">Settings</span>
         </EcoButton>
-        <EcoButton variant="outline" size="sm" onClick={signOut}>
-          <LogOut className="h-4 w-4 mr-2" />
-          Logout
+        <EcoButton variant="outline" size="sm" onClick={signOut} className="flex-1 sm:flex-none">
+          <LogOut className="h-4 w-4 sm:mr-2" />
+          <span className="hidden sm:inline">Logout</span>
         </EcoButton>
       </div>
     </div>
