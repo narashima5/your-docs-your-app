@@ -10,6 +10,7 @@ import { VideoPlayer } from "@/components/lessons/VideoPlayer"
 import { QuizTask } from "@/components/lessons/QuizTask"
 import { LessonStartModal } from "@/components/lessons/LessonStartModal"
 import { useLessonMissions } from "@/hooks/useLessonMissions"
+import { AppLayout } from "@/components/layout/AppLayout"
 
 const getDifficultyColor = (difficulty: string) => {
   switch (difficulty) {
@@ -117,6 +118,7 @@ export default function Lessons() {
     )
   }
   return (
+    <AppLayout>
     <div className="min-h-screen bg-gradient-to-br from-background via-primary/2 to-accent/5">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Header */}
@@ -449,5 +451,6 @@ export default function Lessons() {
         </div>
       )}
     </div>
+    </AppLayout>
   )
 }

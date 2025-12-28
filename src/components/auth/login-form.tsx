@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Link, useNavigate } from "react-router-dom"
+import { Link, useNavigate, useLocation } from "react-router-dom"
 import { EcoButton } from "@/components/ui/eco-button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -19,6 +19,10 @@ export function LoginForm() {
   const { toast } = useToast()
   const { signIn } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+  
+  // Get the return URL from state, or default to dashboard
+  const from = (location.state as { from?: string })?.from || '/dashboard'
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -33,7 +37,8 @@ export function LoginForm() {
         variant: "destructive"
       })
     } else {
-      navigate('/dashboard', { replace: true })
+      // Redirect to the page they tried to access, or dashboard
+      navigate(from, { replace: true })
     }
 
     setIsLoading(false)

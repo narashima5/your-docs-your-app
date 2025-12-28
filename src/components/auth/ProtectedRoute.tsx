@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 
 interface ProtectedRouteProps {
@@ -7,14 +7,21 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { user, loading } = useAuth()
+  const { user, session, loading } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
 
   useEffect(() => {
-    if (!loading && !user) {
-      navigate('/login', { replace: true })
+    // Only redirect when not loading and there's no valid session
+    if (!loading && !session) {
+      // Store the attempted URL for redirect after login
+      const returnUrl = location.pathname + location.search
+      navigate('/login', { 
+        replace: true, 
+        state: { from: returnUrl } 
+      })
     }
-  }, [user, loading, navigate])
+  }, [session, loading, navigate, location])
 
   if (loading) {
     return (
@@ -27,7 +34,8 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     )
   }
 
-  if (!user) {
+  // Don't render children if there's no session
+  if (!session) {
     return null
   }
 
