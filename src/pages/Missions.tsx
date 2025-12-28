@@ -15,6 +15,7 @@ import { FileUpload } from "@/components/missions/FileUpload"
 import { Leaderboard } from "@/components/missions/Leaderboard"
 import { MissionDetailsModal } from "@/components/missions/MissionDetailsModal"
 import { BadgesList } from "@/components/dashboard/BadgesList"
+import { AppLayout } from "@/components/layout/AppLayout"
 
 const getDifficultyColor = (difficulty: string) => {
   switch (difficulty) {
@@ -242,6 +243,7 @@ export default function Missions() {
   }
 
   return (
+    <AppLayout>
     <div className="min-h-screen bg-gradient-to-br from-background via-primary/2 to-accent/5">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Header */}
@@ -523,5 +525,6 @@ export default function Missions() {
         {showBadges && <BadgesList onClose={() => setShowBadges(false)} />}
       </div>
     </div>
+    </AppLayout>
   )
 }
